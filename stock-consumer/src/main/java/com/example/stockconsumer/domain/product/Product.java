@@ -26,4 +26,14 @@ public class Product {
 
     private LocalDateTime concertDateTime;
 
+    // 재고 감소 시키기
+    public void decreaseStock(Integer stock) {
+        this.stock = this.stock - stock;
+    }
+
+    // 재고 증가 시키기 (환불 경우)
+    public void increaseStock(Integer stock) {
+        this.stock = this.stock + stock;
+    }
+
 }
