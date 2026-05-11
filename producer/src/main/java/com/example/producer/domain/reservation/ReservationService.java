@@ -20,7 +20,7 @@ public class ReservationService {
     private final KafkaTemplate<String, KafkaEventReservation> kafkaTemplate;
     private final ProductRepository productRepository;
 
-    private final String CREATE_TOPIC = "create-reservation";
+    private final String CREATE_TOPIC = "reservation_requested";
 
     public void addReservation(CreateReservationRequest req) {
 

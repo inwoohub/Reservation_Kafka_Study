@@ -47,6 +47,8 @@ spring:
       #           ex) com.example.reservationhistoryconsumer.kafka.dto 처럼 내껏만 열어두는 설정도 가능함
       # default.type 은 Kafka 에서 받은 JSON 을 어떤 Java클래스로 바꿀지 설정. (프로듀서랑 맞춰야겠다.)
 
+    properties:
+      spring.json.add.type.headers: false # 헤더에 type 넣지 않기 설정
 
   jpa:
     hibernate:

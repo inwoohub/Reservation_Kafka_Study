@@ -16,6 +16,11 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092 # 현재 카프카를 local 에서 9092 포트로 열어둠. (서버 주소 연결)
 
+    # producer 설정
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer # 생성자의 메시지 키를 키 값을 문자열 형태로 직렬화
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer # JSON 형태로 메시지 값 직렬화 (RestApI)
+
     # consumer 설정
     consumer:
       group-id: reservation-history-group
@@ -42,6 +47,8 @@ spring:
       #           ex) com.example.reservationhistoryconsumer.kafka.dto 처럼 내껏만 열어두는 설정도 가능함
       # default.type 은 Kafka 에서 받은 JSON 을 어떤 Java클래스로 바꿀지 설정. (프로듀서랑 맞춰야겠다.)
 
+    properties:
+      spring.json.add.type.headers: false # 헤더에 type 넣지 않기 설정
 
   jpa:
     hibernate:

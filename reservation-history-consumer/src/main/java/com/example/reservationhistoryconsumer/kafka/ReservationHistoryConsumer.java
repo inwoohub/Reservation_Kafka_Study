@@ -6,6 +6,7 @@ import com.example.reservationhistoryconsumer.kafka.dto.KafkaEventReservation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,18 +20,24 @@ public class ReservationHistoryConsumer {
 
     private final ReservationRepository reservationRepository;
 
+    private final KafkaTemplate<String, Reservation> kafkaTemplate;
+
+    private final String CREATE_TOPIC = "reservation_created"; // 토픽을 reservation_created
+
     @KafkaListener(
-            topics = "create-reservation",
+            topics = "reservation_requested",
             groupId = "reservation-history-group"
     )
-
     public void consume(KafkaEventReservation event) {
 
-        // 1. 카프카에서 불러온 데이터 읽기 -> event
+        // 1. 예매 내역 저장 할 수 있는 객체로 변환
         Reservation reservation = new Reservation(event);
 
-        // 2. DB에 저장하기
-        reservationRepository.save(reservation);
+        // 2. 저장하기
+        Reservation save = reservationRepository.save(reservation);
+
+        // 3. Consumer가 Producer의 역할도 하기 (여기서 메시지 발행)
+        kafkaTemplate.send(CREATE_TOPIC, save);
 
     }
 
