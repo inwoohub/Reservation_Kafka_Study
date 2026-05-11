@@ -1,6 +1,9 @@
 package com.example.reservationhistoryconsumer.kafka;
 
+import com.example.reservationhistoryconsumer.domain.reservation.Reservation;
+import com.example.reservationhistoryconsumer.domain.reservation.ReservationRepository;
 import com.example.reservationhistoryconsumer.kafka.dto.KafkaEventReservation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -11,24 +14,24 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ReservationHistoryConsumer {
+
+    private final ReservationRepository reservationRepository;
 
     @KafkaListener(
             topics = "create-reservation",
             groupId = "reservation-history-group"
     )
 
-    public void consume(KafkaEventReservation event){
-        log.info("=======카프카 이벤트 수신 확인=======");
-        log.info("eventId = {}", event.getEventId());
-        log.info("orderId = {}", event.getOrderId());
-        log.info("productId = {}", event.getProductId());
-        log.info("quantity = {}", event.getQuantity());
-        log.info("totalPrice = {}", event.getTotalPrice());
-        log.info("buyerName = {}", event.getBuyerName());
-        log.info("staus = {}", event.getStatus());
-        log.info("timestamp = {}", event.getTimestamp());
-        log.info("================================");
+    public void consume(KafkaEventReservation event) {
+
+        // 1. 카프카에서 불러온 데이터 읽기 -> event
+        Reservation reservation = new Reservation(event);
+
+        // 2. DB에 저장하기
+        reservationRepository.save(reservation);
+
     }
 
 

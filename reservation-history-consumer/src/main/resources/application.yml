@@ -16,6 +16,11 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092 # 현재 카프카를 local 에서 9092 포트로 열어둠. (서버 주소 연결)
 
+    # producer 설정
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer # 생성자의 메시지 키를 키 값을 문자열 형태로 직렬화
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer # JSON 형태로 메시지 값 직렬화 (RestApI)
+
     # consumer 설정
     consumer:
       group-id: reservation-history-group
