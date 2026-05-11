@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -18,7 +17,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ReservationService {
 
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, KafkaEventReservation> kafkaTemplate;
     private final ProductRepository productRepository;
 
     private final String CREATE_TOPIC = "create-reservation";
@@ -38,7 +37,7 @@ public class ReservationService {
         KafkaEventReservation kafkaEventReservation = new KafkaEventReservation(eventId, orderId,req, product, ReservationStatus.PURCHASE_REQUESTED,timestamp);
 
         // 3. 카프카에 데이터 올리기
-        kafkaTemplate.send(CREATE_TOPIC, kafkaEventReservation.toString());
+        kafkaTemplate.send(CREATE_TOPIC, kafkaEventReservation);
 
     }
 
