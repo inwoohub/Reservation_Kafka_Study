@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: reservation-history-consumer
+
+  threads:
+    virtual:
+      enabled: true # 자바 21 버전을 통해서 이번에 버츄얼 스레드도 한번 써보기
+
+  datasource:
+    # 도커로 뚫어놓은 127.0.0.1:3306 주소와 데이터베이스 이름(shop_db) 사용
+    url: jdbc:mysql://localhost:3307/shop_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  kafka:
+    bootstrap-servers: localhost:9092 # 지금 도커로 띄운 카프카 서버 주소와 포트 (내 pc에서 띄우고 9092 포트로 띄웠음)
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer # 생성자의 메시지 키를 키 값을 문자열 형태로 직렬화
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer # JSON 형태로 메시지 값 직렬화 (RestApI)
+  # 여기서 왜 직렬화를 해야하나?
+  # 1. kafka 는 네트워크를 통해 메시지를 전송하는데, Java 객체를 있는 그대로를 네트워크로 전송할 수 없음
+  # 2. 따라서 바이트 스트림으로 변환 즉, 직렬화가 필요함
+  # 3. 또한 다른 서비스에서 언어 간에 데이터를 주고 받을 때, 직렬화된 형태를 통해 호환성을 높일 수 있음
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        show_sql: false
+        jdbc:
+          time_zone: Asia/Seoul
+
+  # Swagger
+  springdoc:
+    swagger-ui:
+      tags-sorter: alpha
+      operations-sorter: alpha
+
+# 카프카에서 로그 확인 할 수 있도록 로깅 설정하기
+logging:
+  level:
+    com.adjh.springbootkafka: DEBUG
+    org:
+      apache.kafka: INFO
+      springframework.kafka: INFO
+
+
