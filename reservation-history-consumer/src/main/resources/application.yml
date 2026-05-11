@@ -36,7 +36,7 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       # kafka 메시지의 key를 String 읽겠다라는 설정
 
-      .value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       # Kafka 에 JSON으로 보낸것을 다시 Java 객체로 바꾸는 설정임 DTO 를 통해 가능해보임.
 
       properties:
