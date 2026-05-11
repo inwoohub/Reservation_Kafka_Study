@@ -1,0 +1,78 @@
+spring:
+  application:
+    name: stock-consumer
+
+  threads:
+    virtual:
+      enabled: true # 자바 21 버전을 통해서 이번에 버츄얼 스레드도 한번 써보기
+
+  datasource:
+    # 도커로 뚫어놓은 127.0.0.1:3306 주소와 데이터베이스 이름(shop_db) 사용
+    url: jdbc:mysql://localhost:3307/shop_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  kafka:
+    bootstrap-servers: localhost:9092 # 현재 카프카를 local 에서 9092 포트로 열어둠. (서버 주소 연결)
+
+    # producer 설정
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer # 생성자의 메시지 키를 키 값을 문자열 형태로 직렬화
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer # JSON 형태로 메시지 값 직렬화 (RestApI)
+
+    # consumer 설정
+    consumer:
+      group-id: stock-group
+      # group-id : kafka에서 Consumer 는 group 단위로 offset 을 처리함
+      #            즉, 어디까지 읽었는지를 확인하기 위함임.
+      #            같은 group-id 를 쓰는 Consumer 들은 일을 나눠서 처리함 ( 여기서 병렬 처리가 가능한거같음 )
+      #            다른 group-id 를 쓴다면 Consumer 들은 같은 메시지를 또 읽어옴 ( 컨슈머가 서로 다른 역할을 할 때 좋아보임 )
+      auto-offset-reset: earliest
+      # auto-offset-reset : earliest는 처음 실행하는 Consumer Group 이면, 가장 오래된 메시지부터 읽겠다라는 설정임
+      #                     lateset 는 Consumer 가 실행된 이후 새로 들어오는 메시지만 읽겠다라는 설정도 가능함
+      #                     학습용오르노느 earliest 를 추천한다고 함.
+
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      # kafka 메시지의 key를 String 읽겠다라는 설정
+
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      # Kafka 에 JSON으로 보낸것을 다시 Java 객체로 바꾸는 설정임 DTO 를 통해 가능해보임.
+
+      properties:
+        spring.json.trusted.packages: "*"
+      #  spring.json.value.default.type: com.example.reservationhistoryconsumer.kafka.dto.KafkaEventReservation
+      # JsonDeserializer 의 추가 설정
+      # packages : "*" 은 카프카 보안상 아무 JSON 역직렬화 시도x 다만 , * 로 설정했으니 일단 모든 패키지 열어두는 설정임.
+      #           ex) com.example.reservationhistoryconsumer.kafka.dto 처럼 내껏만 열어두는 설정도 가능함
+      # default.type 은 Kafka 에서 받은 JSON 을 어떤 Java클래스로 바꿀지 설정. (프로듀서랑 맞춰야겠다.)
+
+    properties:
+      spring.json.add.type.headers: false # 헤더에 type 넣지 않기 설정
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        show_sql: false
+        jdbc:
+          time_zone: Asia/Seoul
+
+  # Swagger
+  springdoc:
+    swagger-ui:
+      tags-sorter: alpha
+      operations-sorter: alpha
+
+# 카프카에서 로그 확인 할 수 있도록 로깅 설정하기
+logging:
+  level:
+    com.adjh.springbootkafka: DEBUG
+    org:
+      apache.kafka: INFO
+      springframework.kafka: INFO
+
+

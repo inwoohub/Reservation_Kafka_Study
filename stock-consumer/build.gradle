@@ -31,6 +31,20 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testAnnotationProcessor 'org.projectlombok:lombok'
+
+    // Swagger
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1'
+    //    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0' //Swagger UI :  http://localhost:8080/swagger-ui/index.html#/
+
+    // Spring Boot Test
+    // 1. Spring Boot 통합 테스트 (웹 API, MockMvc, AssertJ 등)
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // 2. Kafka 통합 테스트 (Embedded Kafka 등)
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+
+    // 3. Junit5
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
