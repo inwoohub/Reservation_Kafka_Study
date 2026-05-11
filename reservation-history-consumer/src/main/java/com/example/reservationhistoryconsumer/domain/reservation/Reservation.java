@@ -45,7 +45,4 @@ public class Reservation {
     private LocalDateTime createdAt; // 예약 내역이 생성된 시간
 
 
-
-
-
 }
