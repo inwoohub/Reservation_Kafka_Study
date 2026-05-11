@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 
 @Table(name = "product")
 @Entity @Getter
@@ -22,11 +23,14 @@ public class Product {
 
     private Integer stock;
 
+    private LocalDateTime concertDateTime;
+
 
     public Product(CreateProductRequest req) {
         this.name = req.getName();
         this.price = req.getPrice();
         this.stock = req.getStock();
+        this.concertDateTime = req.getConcertDateTime();
     }
 
 
