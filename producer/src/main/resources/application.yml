@@ -38,11 +38,11 @@ spring:
         jdbc:
           time_zone: Asia/Seoul
 
-  # Swagger
-  springdoc:
-    swagger-ui:
-      tags-sorter: alpha
-      operations-sorter: alpha
+# Swagger
+springdoc:
+  swagger-ui:
+    tags-sorter: alpha
+    operations-sorter: alpha
 
 # 카프카에서 로그 확인 할 수 있도록 로깅 설정하기
 logging:
