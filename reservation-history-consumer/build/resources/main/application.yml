@@ -41,7 +41,13 @@ spring:
 
       properties:
         spring.json.trusted.packages: "*"
+
+        spring.json.use.type.headers: false
+        # 헤더에 있는 타입지정을 쓰지 않겠다 선언
+
       # spring.json.value.default.type: com.example.reservationhistoryconsumer.kafka.dto.KafkaEventReservation
+      # 타입을 지정하니 해당 DTO 만 쓸고 하다보니 다른 TOPIC 에 대해서 DTO 가 다름으로써 에러 생김
+
       # JsonDeserializer 의 추가 설정
       # packages : "*" 은 카프카 보안상 아무 JSON 역직렬화 시도x 다만 , * 로 설정했으니 일단 모든 패키지 열어두는 설정임.
       #           ex) com.example.reservationhistoryconsumer.kafka.dto 처럼 내껏만 열어두는 설정도 가능함
