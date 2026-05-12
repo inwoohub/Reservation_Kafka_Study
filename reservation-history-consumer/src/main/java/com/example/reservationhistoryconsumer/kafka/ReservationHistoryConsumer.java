@@ -27,7 +27,8 @@ public class ReservationHistoryConsumer {
 
     @KafkaListener(
             topics = "reservation_requested",
-            groupId = "reservation-history-group"
+            groupId = "reservation-history-group",
+            containerFactory = "reservationKafkaListenerContainerFactory"
     )
     public void createReservation(KafkaEventReservation event) {
 
@@ -44,7 +45,8 @@ public class ReservationHistoryConsumer {
 
     @KafkaListener(
             topics = "stock-result",
-            groupId = "reservation-history-group"
+            groupId = "reservation-history-group",
+            containerFactory = "stockResultKafkaListenerContainerFactory"
     )
     public void stockResult(KafkaEventStockResult event) {
         // 1. 스탁 결과에서 예약 상태 가져와서 예약 상태 변경 시키기
