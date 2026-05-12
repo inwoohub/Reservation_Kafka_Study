@@ -1,6 +1,7 @@
 package com.example.producer.domain.reservation.dto;
 
 import com.example.producer.domain.product.Product;
+import com.example.producer.domain.product.ProductStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,9 @@ public class KafkaEventReservation {
     private Integer quantity;    // 수량
     private Integer totalPrice;  // 총 결제 금액 (서버가 DB에서 단가를 조회해 계산해서 넣음!)
 
+    // 상품 상태
+    private ProductStatus productStatus;
+
     // 비회원 구매자 정보
     private String buyerName;
     private String birthDate;
@@ -34,6 +38,7 @@ public class KafkaEventReservation {
         this.productId = req.getProductId();
         this.quantity = req.getQuantity();
         this.totalPrice = req.getQuantity() * product.getPrice();
+        this.productStatus = product.getStatus();
         this.buyerName = req.getBuyerName();
         this.birthDate = req.getBirthDate();
         this.tempPassword = req.getTeamPassword();

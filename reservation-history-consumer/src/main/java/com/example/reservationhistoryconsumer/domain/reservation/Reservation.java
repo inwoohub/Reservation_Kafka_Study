@@ -41,7 +41,7 @@ public class Reservation {
      */
     @Setter
     @Enumerated(EnumType.STRING)
-    private ReservationStatus status; // ENUM 타입으로 주문 상태 관리
+    private ReservationStatus reservationStatus; // ENUM 타입으로 주문 상태 관리
 
     private Long timestamp; // 이벤트 발생한 시간도 함께 저장하기
 
@@ -56,7 +56,7 @@ public class Reservation {
         this.buyerName = event.getBuyerName();
         this.birthDate = event.getBirthDate();
         this.tempPassword = event.getTempPassword();
-        this.status = event.getStatus();
+        this.reservationStatus = event.getReservationStatus();
         this.timestamp = event.getTimestamp();
         this.createdAt = LocalDateTime.now();
     }

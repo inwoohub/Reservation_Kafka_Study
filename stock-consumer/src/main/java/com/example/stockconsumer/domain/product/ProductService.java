@@ -1,8 +1,10 @@
 package com.example.stockconsumer.domain.product;
 
+import com.example.stockconsumer.global.error.ApiException;
 import com.example.stockconsumer.kafka.dto.Reservation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +22,12 @@ public class ProductService {
 
         // 1. 상품 번호로 물건 가져오기
         Product product = productRepository.findById(event.getProductId())
-                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다. : " + event.getProductId()));
+                .orElseThrow(() ->
+                        {
+                            //
+                            new ApiException(HttpStatus.NOT_FOUND, "404", "NOT_FOUND", "상품을 찾을 수 없습니다.");
+                        });
+
 
         // 2. 구매자 수량 비교하기
         if(product.getStock() < event.getQuantity()){
