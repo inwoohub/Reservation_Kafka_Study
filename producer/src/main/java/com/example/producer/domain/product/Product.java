@@ -23,12 +23,16 @@ public class Product {
 
     private Integer stock;
 
+    @Enumerated(EnumType.STRING)
+    private ProductStatus status;
+
     private LocalDateTime concertDateTime;
 
 
     public Product(CreateProductRequest req) {
         this.name = req.getName();
         this.price = req.getPrice();
+        this.status = ProductStatus.SELLING; // default 는 판매중으로
         this.stock = req.getStock();
         this.concertDateTime = req.getConcertDateTime();
     }
