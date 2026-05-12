@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -38,6 +39,7 @@ public class Reservation {
      * @Enumerated 어노테이션을 통해서 enum 타입을 DB에 저장할 떄 타입을 지정해줄 수 있음
      * EnumType.STRING 을 통해 enum 타입을 String 타입으로 저장 가능
      */
+    @Setter
     @Enumerated(EnumType.STRING)
     private ReservationStatus status; // ENUM 타입으로 주문 상태 관리
 
