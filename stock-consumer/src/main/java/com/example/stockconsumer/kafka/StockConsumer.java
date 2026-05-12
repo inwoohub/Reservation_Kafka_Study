@@ -27,7 +27,7 @@ public class StockConsumer {
      * 2. stock-result 이벤트 발행하기
      */
     @KafkaListener(
-            topics = "reservation_requested",
+            topics = "reservation_created",
             groupId = "stock-group"
     )
     public void consume(Reservation event){

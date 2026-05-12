@@ -1,15 +1,16 @@
-package com.example.stockconsumer.kafka.dto;
+package com.example.reservationhistoryconsumer.kafka.dto;
 
+import com.example.reservationhistoryconsumer.domain.reservation.ReservationStatus;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Getter
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
-public class Reservation {
+@NoArgsConstructor
+public class KafkaEventStockResult {
 
     private Long id;
 
@@ -35,9 +36,6 @@ public class Reservation {
 
     private LocalDateTime createdAt; // 예약 내역이 생성된 시간
 
-    // 구매 성공
-    public void purchaseConfirmed() {
-        this.status = ReservationStatus.PURCHASE_CONFIRMED;
-    }
-
 }
+
+
