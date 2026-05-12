@@ -3,6 +3,7 @@ package com.example.reservationhistoryconsumer.kafka;
 import com.example.reservationhistoryconsumer.domain.reservation.Reservation;
 import com.example.reservationhistoryconsumer.domain.reservation.ReservationService;
 import com.example.reservationhistoryconsumer.kafka.dto.KafkaEventReservation;
+import com.example.reservationhistoryconsumer.kafka.dto.KafkaEventStockResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -43,9 +44,9 @@ public class ReservationHistoryConsumer {
 
     @KafkaListener(
             topics = "stock-result",
-            groupId = "stock-result-group"
+            groupId = "reservation-history-group"
     )
-    public void stockResult(Reservation event) {
+    public void stockResult(KafkaEventStockResult event) {
         // 1. 스탁 결과에서 예약 상태 가져와서 예약 상태 변경 시키기
         reservationService.stockResult(event);
     }
