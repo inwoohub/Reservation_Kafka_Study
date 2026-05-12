@@ -33,6 +33,14 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(productService.getProducts());
     }
 
+    // 판매 중인 상태만 조회
+    @Operation(summary = "판매 중인 상품만 조회")
+    @GetMapping("/selling")
+    public ResponseEntity<List<Product>> getSellingProducts() {
+        List<Product> products = productService.getSellingAll();
+        return ResponseEntity.status(HttpStatus.OK).body(products);
+    }
+
 
 
 

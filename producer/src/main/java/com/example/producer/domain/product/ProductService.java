@@ -21,8 +21,14 @@ public class ProductService {
     }
 
 
+    // 모든 제품 조회
     public List<Product> getProducts() {
         return productRepository.findAll();
+    }
+
+    // 판매중인 제품만 조회
+    public List<Product> getSellingAll() {
+        return productRepository.getSellingAll();
     }
 
 }
