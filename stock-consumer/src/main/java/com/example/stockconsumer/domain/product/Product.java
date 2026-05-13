@@ -24,6 +24,9 @@ public class Product {
 
     private Integer stock;
 
+    @Enumerated(EnumType.STRING)
+    private ProductStatus status;
+
     private LocalDateTime concertDateTime;
 
     // 재고 감소 시키기
@@ -35,5 +38,11 @@ public class Product {
     public void increaseStock(Integer stock) {
         this.stock = this.stock + stock;
     }
+
+    // 품절 상태 변경
+    public void setStatus(ProductStatus status) {
+        this.status = status;
+    }
+
 
 }

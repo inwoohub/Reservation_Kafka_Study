@@ -36,6 +36,11 @@ public class ProductService {
         // 3. 상품 차감시키기
         product.decreaseStock(event.getQuantity());
 
+        // 4. 만약 상품이 품절이 나면 품절 상태로 변경하기
+        if( product.getStock() == 0){
+            product.setStatus(ProductStatus.CLOSED);
+        }
+
         return true;
     }
 
