@@ -8,8 +8,6 @@ services:
     environment:
       - MYSQL_DATABASE=shop_db
       - MYSQL_ROOT_PASSWORD=password
-    volumes:
-      - ./mysql_data:/var/lib/mysql
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
