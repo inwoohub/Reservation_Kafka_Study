@@ -22,20 +22,20 @@ const startTime = new Date();
 
 console.log(`===== k6 테스트 시작 =====`);
 
-console.log(`시작 시간: ${startTime.toISOString()}`);
+console.log(`시작 시간: ${startTime.toString()}`);
 
 console.log(`테스트 대상: POST http://localhost:8081/api/reservation`);
 
 export const options = {
-  vus: 300,
-  duration: '30s',
+  vus: 1000,
+  duration: '100s',
 };
 
 export default function () {
   const randomNum = Math.floor(Math.random() * 100000000);
 
   const payload = JSON.stringify({
-    productId: 2,
+    productId: 1,
     quantity: 1,
     buyerName: `buyer-${randomNum}`,
     birthDate: `19990101`,

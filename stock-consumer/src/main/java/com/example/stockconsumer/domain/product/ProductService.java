@@ -45,6 +45,7 @@ public class ProductService {
     }
 
     // 재고 확인 및 차감 원자적 처리
+    @Transactional
     public boolean stockServiceV2(Reservation event) {
 
         // 1. 구매자 수량 확인하기
