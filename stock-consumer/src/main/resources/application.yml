@@ -41,7 +41,7 @@ spring:
 
       properties:
         spring.json.trusted.packages: "*"
-        spring.json.value.default.type: com/example/stockconsumer/kafka/dto/Reservation.java
+        spring.json.value.default.type: com.example.stockconsumer.kafka.dto.Reservation
       # JsonDeserializer 의 추가 설정
       # packages : "*" 은 카프카 보안상 아무 JSON 역직렬화 시도x 다만 , * 로 설정했으니 일단 모든 패키지 열어두는 설정임.
       #           ex) com.example.reservationhistoryconsumer.kafka.dto 처럼 내껏만 열어두는 설정도 가능함
@@ -61,11 +61,11 @@ spring:
         jdbc:
           time_zone: Asia/Seoul
 
-  # Swagger
-  springdoc:
-    swagger-ui:
-      tags-sorter: alpha
-      operations-sorter: alpha
+# Swagger
+springdoc:
+  swagger-ui:
+    tags-sorter: alpha
+    operations-sorter: alpha
 
 # 카프카에서 로그 확인 할 수 있도록 로깅 설정하기
 logging:
