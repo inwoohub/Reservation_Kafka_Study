@@ -28,7 +28,7 @@ public class ProductService {
         }
 
         // 2. 구매자 수량 비교하기
-        if( product.getStock() < event.getQuantity() && event.getQuantity() < 0 ){
+        if( product.getStock() < event.getQuantity() || event.getQuantity() < 0 ){
             log.info("stockService : 구매 수량보다 재고가 부족합니다.");
             return false;
         }

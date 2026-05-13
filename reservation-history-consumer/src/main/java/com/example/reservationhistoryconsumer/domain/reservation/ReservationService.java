@@ -26,7 +26,7 @@ public class ReservationService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 ID입니다."));
 
         // 2. 예약 내역 상태 변경 (더티 체킹으로 save, update 안해줘도 됨!)
-        reservation.setReservationStatus(event.getStatus());
+        reservation.setReservationStatus(event.getReservationStatus());
 
         log.info("예약 상태 변경 완료! -> {} 🤒", reservation.getReservationStatus());
 

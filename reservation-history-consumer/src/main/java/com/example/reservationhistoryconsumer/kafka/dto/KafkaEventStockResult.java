@@ -30,7 +30,7 @@ public class KafkaEventStockResult {
 
     private String tempPassword; // 주문 비밀번호 4자리 ex) 1234
 
-    private ReservationStatus status; // ENUM 타입으로 주문 상태 관리
+    private ReservationStatus reservationStatus; // ENUM 타입으로 주문 상태 관리
 
     private Long timestamp; // 이벤트 발생한 시간도 함께 저장하기
 
