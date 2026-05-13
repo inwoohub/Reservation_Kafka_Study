@@ -40,4 +40,9 @@ public class Reservation {
         this.reservationStatus = ReservationStatus.PURCHASE_CONFIRMED;
     }
 
+    // 구매 실패
+    public void purchaseFailed() {
+        this.reservationStatus = ReservationStatus.PURCHASE_FAILED;
+    }
+
 }
