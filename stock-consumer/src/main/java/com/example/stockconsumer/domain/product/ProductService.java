@@ -28,7 +28,7 @@ public class ProductService {
         }
 
         // 2. 구매자 수량 비교하기
-        if( product.getStock() < event.getQuantity() || event.getQuantity() < 0 ){
+        if (product.getStock() < event.getQuantity() || event.getQuantity() <= 0) {
             log.info("stockService : 구매 수량보다 재고가 부족합니다.");
             return false;
         }
@@ -37,13 +37,34 @@ public class ProductService {
         product.decreaseStock(event.getQuantity());
 
         // 4. 만약 상품이 품절이 나면 품절 상태로 변경하기
-        if( product.getStock() == 0){
+        if (product.getStock() == 0) {
             product.setStatus(ProductStatus.CLOSED);
         }
 
         return true;
     }
 
+    // 재고 확인 및 차감 원자적 처리
+    public boolean stockServiceV2(Reservation event) {
 
+        // 1. 구매자 수량 확인하기
+        if (event.getQuantity() == null || event.getQuantity() <= 0) {
+            log.info("구매자 주문 수량이 음수거나 null값 입니다.");
+            return false;
+        }
 
+        boolean decreaseStockCheck = productRepository.decreaseStock(
+                event.getProductId(),
+                event.getQuantity(),
+                ProductStatus.SELLING,
+                ProductStatus.CLOSED
+        );
+
+        if (!decreaseStockCheck) {
+            log.info("재고가 부족하여 주문에 실패하였습니다.");
+            return false;
+        }
+
+        return true;
+    }
 }
