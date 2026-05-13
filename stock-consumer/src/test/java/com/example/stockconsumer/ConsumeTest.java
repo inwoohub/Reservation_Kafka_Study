@@ -23,7 +23,7 @@ public class ConsumeTest {
 
         Reservation reservation = new Reservation(1L, "eventId", "orderId", 3L, 3, 192000, "뚱이", "000217", "0217", ReservationStatus.PURCHASE_CONFIRMED, 17712382L ,LocalDateTime.now());
 
-        stockConsumer.consume(reservation);
+        stockConsumer.reservationSuccess(reservation);
 
     }
 

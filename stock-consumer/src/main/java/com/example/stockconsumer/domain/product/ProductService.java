@@ -23,13 +23,13 @@ public class ProductService {
 
         // 2. 상품이 없는 경우 재고 차감전에 실패
         if (product == null) {
-            log.error("stockService : 상품을 찾을 수 없습니다.");
+            log.info("stockService : 상품을 찾을 수 없습니다.");
             return false;
         }
 
         // 2. 구매자 수량 비교하기
-        if(product.getStock() < event.getQuantity()){
-            log.error("stockService : 구매 수량보다 재고가 부족합니다.");
+        if( product.getStock() < event.getQuantity() && event.getQuantity() < 0 ){
+            log.info("stockService : 구매 수량보다 재고가 부족합니다.");
             return false;
         }
 
