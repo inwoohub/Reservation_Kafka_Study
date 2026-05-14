@@ -9,13 +9,11 @@ import com.example.producer.domain.reservation.dto.ReservationStatus;
 import com.example.producer.global.error.ApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.security.oauthbearer.JwtBearerJwtRetriever;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -28,7 +26,8 @@ public class ReservationService {
     private final ProductRepository productRepository;
 
     private final String CREATE_TOPIC = "reservation_requested";
-    private final RedisTemplate<Object, Object> redisTemplate;
+
+    private final RedisTemplate redisTemplate;
 
     private static final String PRODUCT_PREFIX = "product:";
     private static final String PRODUCT_STOCK_PREFIX = "product:stock:";
@@ -77,8 +76,12 @@ public class ReservationService {
             throw new ApiException(HttpStatus.NOT_FOUND, "404", "NOT_FOUND", "존재하지 않는 상품입니다.");
         }
 
-        if(stock == 0){
+        if(stock <= 0){
             throw new ApiException(HttpStatus.BAD_REQUEST, "400", "BAD_REQUEST", "품절된 상품 입니다.");
+        }
+
+        if(req.getQuantity() > stock){
+            throw new ApiException(HttpStatus.BAD_REQUEST, "400", "BAD_REQUEST", "재고보다 주문 수량이 많습니다.");
         }
 
         // null 이 아니니까 타입 변환하기

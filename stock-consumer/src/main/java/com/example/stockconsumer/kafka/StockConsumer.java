@@ -1,6 +1,7 @@
 package com.example.stockconsumer.kafka;
 
 import com.example.stockconsumer.domain.product.ProductService;
+import com.example.stockconsumer.kafka.dto.KafkaEventReservation;
 import com.example.stockconsumer.kafka.dto.Reservation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,12 +54,12 @@ public class StockConsumer {
     }
 
     /**
-     * 성능 개선을 위해서 재고 차감을 원자적 처리
+     * V2. 성능 개선을 위해서 재고 차감을 원자적 처리
      */
-    @KafkaListener(
-            topics = "reservation_created",
-            groupId = "stock-group"
-    )
+//    @KafkaListener(
+//            topics = "reservation_created",
+//            groupId = "stock-group"
+//    )
     public void reservationSuccessV2(Reservation event){
 
         // 1. 재고 확인 및 차감
@@ -77,6 +78,26 @@ public class StockConsumer {
 
         // 4. stock-result 이벤트 발행하기
         kafkaTemplate.send(STOCK_TOPIC, event);
+    }
+
+
+    /**
+     * V3. 레디스 Lua Script 를 통해 DB로 접근하지 않고, Redis 에서만 재고 차감 후
+     *     성공 or 실패 이벤트 발행
+     *
+     * 기존 : DB 연산 작업이 1회 있었음
+     * 변경 : DB 연산 작업 x, 대신 Memory DB 인 Redis 에서 연산 작업 1회로 성능 올리기
+     */
+    @KafkaListener(
+            topics = "reservation_requested",
+            groupId = "stock-group"
+    )
+    public void reservationSuccessV3(KafkaEventReservation event){
+
+        // 1. Redis 에서 Lua Script 활용해서 재고 차감
+
+
+
     }
 
 

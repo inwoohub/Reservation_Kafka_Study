@@ -65,7 +65,38 @@ public class ProductService {
             log.info("재고가 부족하여 주문에 실패하였습니다.");
             return false;
         }
+        return true;
+    }
+
+    /**
+     * V3.
+     * 버전 2에서 MySQL를 통해 재고를 처리하던 방식에서
+     * Redis 에서 재고 처리하는 방식으로 변경
+     */
+    @Transactional
+    public boolean stockServiceV3(Reservation event) {
+
+        // 1. 구매자 수량 확인하기
+        if (event.getQuantity() == null || event.getQuantity() <= 0) {
+            log.info("구매자 주문 수량이 음수거나 null값 입니다.");
+            return false;
+        }
+
+        boolean decreaseStockCheck = productRepository.decreaseStock(
+                event.getProductId(),
+                event.getQuantity(),
+                ProductStatus.SELLING,
+                ProductStatus.CLOSED
+        );
+
+        if (!decreaseStockCheck) {
+            log.info("재고가 부족하여 주문에 실패하였습니다.");
+            return false;
+        }
+
 
         return true;
     }
+
+
 }

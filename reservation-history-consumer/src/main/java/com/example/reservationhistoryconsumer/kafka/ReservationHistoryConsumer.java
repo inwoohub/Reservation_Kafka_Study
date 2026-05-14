@@ -25,11 +25,19 @@ public class ReservationHistoryConsumer {
 
     private final String CREATE_TOPIC = "reservation_created"; // 토픽을 reservation_created
 
-    @KafkaListener(
-            topics = "reservation_requested",
-            groupId = "reservation-history-group",
-            containerFactory = "reservationKafkaListenerContainerFactory"
-    )
+    /**
+     * 기존 : 예매 내역 DB에 저장 -> 메시지 발행
+     *
+     * 변경 : 예매 내역 저장 x, 메시지 발행 x -> 기존 requested 는 바로
+     * 4번째 동작흐름이었던 재고 확인 및 차감 후 결과 이벤트 발행으로 넘어감
+     *
+     * 따라서 해당 예매 내역을 저장하는 로직을 맨 뒤로 뺌으로써 SAVE 연산 줄임
+     */
+//    @KafkaListener(
+//            topics = "reservation_requested",
+//            groupId = "reservation-history-group",
+//            containerFactory = "reservationKafkaListenerContainerFactory"
+//    )
     public void createReservation(KafkaEventReservation event) {
 
         // 1. 예매 내역 저장 할 수 있는 객체로 변환
@@ -42,6 +50,8 @@ public class ReservationHistoryConsumer {
         reservationKafkaTemplate.send(CREATE_TOPIC, save);
 
     }
+
+
 
     @KafkaListener(
             topics = "stock-result",
