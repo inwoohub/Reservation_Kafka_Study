@@ -42,6 +42,8 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1'
     //    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0' //Swagger UI :  http://localhost:8080/swagger-ui/index.html#/
 
+    // Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     // Spring Boot Test
     // 1. Spring Boot 통합 테스트 (웹 API, MockMvc, AssertJ 등)
