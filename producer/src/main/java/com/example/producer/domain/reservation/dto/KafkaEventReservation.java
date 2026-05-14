@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -39,6 +41,20 @@ public class KafkaEventReservation {
         this.quantity = req.getQuantity();
         this.totalPrice = req.getQuantity() * product.getPrice();
         this.productStatus = product.getStatus();
+        this.buyerName = req.getBuyerName();
+        this.birthDate = req.getBirthDate();
+        this.tempPassword = req.getTeamPassword();
+        this.status = status;
+        this.timestamp = timestamp;
+    }
+
+    public KafkaEventReservation(String eventId, String orderId, CreateReservationRequest req, int price, ProductStatus productStatus , ReservationStatus status, Long timestamp) {
+        this.eventId = eventId;
+        this.orderId = orderId;
+        this.productId = req.getProductId();
+        this.quantity = req.getQuantity();
+        this.totalPrice = req.getQuantity() * price;
+        this.productStatus = productStatus;
         this.buyerName = req.getBuyerName();
         this.birthDate = req.getBirthDate();
         this.tempPassword = req.getTeamPassword();

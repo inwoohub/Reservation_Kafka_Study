@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -17,7 +18,8 @@ public class ProductService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    private final String PREFIX = "product:stock:";
+    private static final String PRODUCT_PREFIX = "product:";
+    private static final String PRODUCT_STOCK_PREFIX = "product:stock:";
 
     @Transactional
     public void addProduct(CreateProductRequest req) {
@@ -27,7 +29,16 @@ public class ProductService {
         Product savedProduct = productRepository.save(product);
 
         // 2. Redis 에서도 저장해주기
-        redisTemplate.opsForValue().set(PREFIX+savedProduct.getId() ,req.getStock() );
+        HashMap<String, String> redisValue = new HashMap<>();
+        redisValue.put("productId", savedProduct.getId().toString());
+        redisValue.put("price", savedProduct.getPrice().toString());
+        redisValue.put("status", savedProduct.getStatus().toString());
+
+        // 3. 상품에 대한 정보 저장하기
+        redisTemplate.opsForValue().set(PRODUCT_PREFIX + savedProduct.getId(), redisValue);
+
+        // 4. 재고만 저장하기
+        redisTemplate.opsForValue().set(PRODUCT_STOCK_PREFIX + savedProduct.getId(), savedProduct.getStock());
 
     }
 

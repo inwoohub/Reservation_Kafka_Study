@@ -22,7 +22,8 @@ public class ReservationController {
     @Operation(summary = "예매하기")
     @PostMapping
     public ResponseEntity<Void> createReservation(@RequestBody CreateReservationRequest req) {
-        reservationService.addReservation(req);
+//        reservationService.addReservation(req); // 이전 버전
+        reservationService.addReservationV2(req); // 성능 개선 버전
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
