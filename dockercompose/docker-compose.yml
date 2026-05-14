@@ -90,3 +90,9 @@ services:
 # 접속 시도 (Handshake): 스프링 앱이 localhost:9092로 접속
 # 정보 확인 (Metadata): "나 로그 보내고 싶은데, 누구한테 보내면 돼?"
 # 카프카 대답: "나는 localhost:9092야!" ← KAFKA_ADVERTISED_LISTENERS가 이걸 알려줌
+
+redis:
+  image: redis:7.4 # 7.4 버전 쓰기
+  container_name: reservation-redis # 레디스 띄우는 컨테이너 이름
+  ports:
+    - "6379:6379"

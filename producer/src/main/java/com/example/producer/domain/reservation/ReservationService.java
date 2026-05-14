@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 @Slf4j
@@ -37,6 +38,7 @@ public class ReservationService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "400", "BAD_REQUEST", "판매중이지 않은 상품입니다.");
         }
 
+
         // 3. eventId & orderId UUID 타입
         String eventId = UUID.randomUUID().toString();
         String orderId = UUID.randomUUID().toString();
@@ -48,6 +50,8 @@ public class ReservationService {
 
         // 5. 카프카에 데이터 올리기
         kafkaTemplate.send(CREATE_TOPIC, kafkaEventReservation);
+
+
     }
 
 }
