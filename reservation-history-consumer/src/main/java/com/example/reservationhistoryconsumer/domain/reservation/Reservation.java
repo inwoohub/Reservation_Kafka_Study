@@ -56,7 +56,7 @@ public class Reservation {
         this.buyerName = event.getBuyerName();
         this.birthDate = event.getBirthDate();
         this.tempPassword = event.getTempPassword();
-        this.reservationStatus = event.getReservationStatus();
+        this.reservationStatus = ReservationStatus.CANCEL_REQUESTED;
         this.timestamp = event.getTimestamp();
         this.createdAt = LocalDateTime.now();
     }

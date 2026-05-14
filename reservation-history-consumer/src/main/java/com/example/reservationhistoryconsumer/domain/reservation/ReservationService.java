@@ -4,6 +4,8 @@ package com.example.reservationhistoryconsumer.domain.reservation;
 import com.example.reservationhistoryconsumer.kafka.dto.KafkaEventStockResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.errors.ApiException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,24 @@ public class ReservationService {
         reservation.setReservationStatus(event.getReservationStatus());
 
         log.info("예약 상태 변경 완료! -> {} 🤒", reservation.getReservationStatus());
+
+    }
+
+    @Transactional
+    public void stockResultV2(KafkaEventStockResult event) {
+
+        // 여기 쿼리도 영속성 컨텍스트를 사용하지 않고, 원자 처리
+        boolean check = reservationRepository.setReservationStatus(event.getId(), event.getReservationStatus());
+
+        // 1. id 가 잘못되었거나, 다른 오류가 있는경우
+        if(!check){
+            log.info("stockResultV2 - 잘못된 요청입니다.");
+            return;
+        }
+
+        else{
+            log.info("예약 상태 변경 완료! -> {} 🤒", event.getReservationStatus());
+        }
 
     }
 
