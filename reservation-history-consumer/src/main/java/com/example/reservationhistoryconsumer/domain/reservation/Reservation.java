@@ -1,6 +1,7 @@
 package com.example.reservationhistoryconsumer.domain.reservation;
 
 import com.example.reservationhistoryconsumer.kafka.dto.KafkaEventReservation;
+import com.example.reservationhistoryconsumer.kafka.dto.KafkaEventStockResult;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -47,6 +48,7 @@ public class Reservation {
 
     private LocalDateTime createdAt; // 예약 내역이 생성된 시간
 
+    // 처음 설계시 썼던 생성자 이제는 사용 x
     public Reservation(KafkaEventReservation event) {
         this.eventId = event.getEventId();
         this.orderId = event.getOrderId();
@@ -59,5 +61,20 @@ public class Reservation {
         this.reservationStatus = ReservationStatus.CANCEL_REQUESTED;
         this.timestamp = event.getTimestamp();
         this.createdAt = LocalDateTime.now();
+    }
+
+    // 이벤트에서 꺼내온 예약 내역 생성자
+    public Reservation(KafkaEventStockResult event) {
+        this.eventId = event.getEventId();
+        this.orderId = event.getOrderId();
+        this.productId = event.getProductId();
+        this.quantity = event.getQuantity();
+        this.totalPrice = event.getTotalPrice();
+        this.buyerName = event.getBuyerName();
+        this.birthDate = event.getBirthDate();
+        this.tempPassword = event.getTempPassword();
+        this.reservationStatus = event.getReservationStatus();
+        this.timestamp = event.getTimestamp();
+        this.createdAt = event.getCreatedAt();
     }
 }

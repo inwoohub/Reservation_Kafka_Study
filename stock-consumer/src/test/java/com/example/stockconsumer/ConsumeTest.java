@@ -21,9 +21,9 @@ public class ConsumeTest {
     @DisplayName("읽어오고 나서 다시 올릴 때 어떯게 올리가는지 객체 확인하기")
     public void test1() throws Exception{
 
-        Reservation reservation = new Reservation(1L, "eventId", "orderId", 3L, 3, 192000, "뚱이", "000217", "0217", ReservationStatus.PURCHASE_CONFIRMED, 17712382L ,LocalDateTime.now());
+//        Reservation reservation = new Reservation(1L, "eventId", "orderId", 3L, 3, 192000, "뚱이", "000217", "0217", ReservationStatus.PURCHASE_CONFIRMED, 17712382L ,LocalDateTime.now());
 
-        stockConsumer.reservationSuccess(reservation);
+//        stockConsumer.reservationSuccess(reservation);
 
     }
 

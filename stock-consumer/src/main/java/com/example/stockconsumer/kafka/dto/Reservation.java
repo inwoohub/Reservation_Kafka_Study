@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Reservation {
 
-    private Long id;
+//    private Long id; // 여기 단계까지 아직 저장되지않았기 때문에 제외
 
     private String eventId; // 이벤트 UUID
 
@@ -35,14 +35,28 @@ public class Reservation {
 
     private LocalDateTime createdAt; // 예약 내역이 생성된 시간
 
-    // 구매 성공
-    public void purchaseConfirmed() {
-        this.reservationStatus = ReservationStatus.PURCHASE_CONFIRMED;
+    public Reservation(KafkaEventReservation event, ReservationStatus reservationStatus) {
+        this.eventId = event.getEventId();
+        this.orderId = event.getOrderId();
+        this.productId = event.getProductId();
+        this.quantity = event.getQuantity();
+        this.totalPrice = event.getTotalPrice();
+        this.buyerName = event.getBuyerName();
+        this.birthDate = event.getBirthDate();
+        this.tempPassword = event.getTempPassword();
+        this.reservationStatus = reservationStatus;
+        this.timestamp = event.getTimestamp();
+        this.createdAt = LocalDateTime.now();
     }
 
-    // 구매 실패
+
     public void purchaseFailed() {
         this.reservationStatus = ReservationStatus.PURCHASE_FAILED;
+    }
+
+
+    public void purchaseConfirmed() {
+        this.reservationStatus = ReservationStatus.PURCHASE_CONFIRMED;
     }
 
 }

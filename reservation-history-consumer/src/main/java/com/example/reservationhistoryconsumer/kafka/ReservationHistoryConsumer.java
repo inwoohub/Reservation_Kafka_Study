@@ -62,8 +62,12 @@ public class ReservationHistoryConsumer {
     public void stockResult(KafkaEventStockResult event) {
         // 1. 스탁 결과에서 예약 상태 가져와서 예약 상태 변경 시키기
 //        reservationService.stockResult(event);
-        reservationService.stockResultV2(event); // 원자 처리
+//        reservationService.stockResultV2(event); // 원자 처리
+        reservationService.stockResultV3(event);
+
     }
+
+
 
 
 }

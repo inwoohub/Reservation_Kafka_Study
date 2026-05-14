@@ -3,11 +3,17 @@ package com.example.stockconsumer.kafka;
 import com.example.stockconsumer.domain.product.ProductService;
 import com.example.stockconsumer.kafka.dto.KafkaEventReservation;
 import com.example.stockconsumer.kafka.dto.Reservation;
+import com.example.stockconsumer.kafka.dto.ReservationStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Slf4j
 @Component
@@ -19,7 +25,15 @@ public class StockConsumer {
 
     private final String STOCK_TOPIC = "stock-result";
 
+    private final RedisScript<Long> decreaseStockScript; // RedisConfig 에서 Bean으로 만든 스크립트 주입 받기
+
     private final ProductService productService;
+
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    private static final String PRODUCT_STOCK_PREFIX = "product:stock:";
+    private final KafkaAdmin kafkaAdmin;
+
 
     /**
      * 예약 내역 이벤트 올라왔을 때
@@ -87,6 +101,10 @@ public class StockConsumer {
      *
      * 기존 : DB 연산 작업이 1회 있었음
      * 변경 : DB 연산 작업 x, 대신 Memory DB 인 Redis 에서 연산 작업 1회로 성능 올리기
+     *
+     * -1 : 재고 없음
+     *  0 : 재고보다 주문 수량이 많음
+     *  1 : 주문 성공
      */
     @KafkaListener(
             topics = "reservation_requested",
@@ -95,8 +113,28 @@ public class StockConsumer {
     public void reservationSuccessV3(KafkaEventReservation event){
 
         // 1. Redis 에서 Lua Script 활용해서 재고 차감
+        Long stockServiceCheck = redisTemplate.execute(
+                decreaseStockScript,
+                List.of(PRODUCT_STOCK_PREFIX + event.getProductId()),
+                String.valueOf(event.getQuantity())
+        );
 
+        // 2. 결과 확인하기
+        Reservation reservation = new Reservation();
+        if(stockServiceCheck == -1L){ // 예약 실패 : 존재하지 않는 상품임
+            reservation = new Reservation(event, ReservationStatus.PURCHASE_FAILED);
+        }
 
+        else if (stockServiceCheck == 0L){ // 예약 실패 : 품절된 상태
+            reservation = new Reservation(event, ReservationStatus.PURCHASE_FAILED);
+        }
+
+        else if (stockServiceCheck == 1L){ // 주문 성공 :
+            reservation = new Reservation(event, ReservationStatus.PURCHASE_CONFIRMED);
+        }
+
+        // 3. 이벤트로 주문 내역 발행
+        kafkaTemplate.send(STOCK_TOPIC, reservation);
 
     }
 

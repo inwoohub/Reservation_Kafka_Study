@@ -4,8 +4,6 @@ package com.example.reservationhistoryconsumer.domain.reservation;
 import com.example.reservationhistoryconsumer.kafka.dto.KafkaEventStockResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.errors.ApiException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +47,17 @@ public class ReservationService {
         else{
             log.info("예약 상태 변경 완료! -> {} 🤒", event.getReservationStatus());
         }
+
+    }
+
+    @Transactional
+    public void stockResultV3(KafkaEventStockResult event) {
+
+        // 1. 여기서 처음으로 데이터 저장
+        Reservation reservation = new Reservation(event);
+        reservationRepository.save(reservation);
+
+        log.info("예약 상태 변경 완료! -> {} 🤒", event.getReservationStatus());
 
     }
 
