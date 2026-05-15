@@ -1,10 +1,7 @@
 package com.example.stockconsumer.kafka;
 
 import com.example.stockconsumer.domain.product.ProductService;
-import com.example.stockconsumer.kafka.dto.KafkaEventReservation;
-import com.example.stockconsumer.kafka.dto.KafkaEventReservationRequest;
-import com.example.stockconsumer.kafka.dto.Reservation;
-import com.example.stockconsumer.kafka.dto.ReservationStatus;
+import com.example.stockconsumer.kafka.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -24,6 +21,8 @@ public class StockConsumer {
 
     private final KafkaTemplate<String, Reservation> kafkaTemplate;
 
+    private final KafkaTemplate<String, KafkaEventStockResult> kafkaTemplateV2;
+
     private final String STOCK_TOPIC = "stock-result";
 
     private final RedisScript<Long> decreaseStockScript; // RedisConfig 에서 Bean으로 만든 스크립트 주입 받기
@@ -38,7 +37,7 @@ public class StockConsumer {
 
     /**
      * 예약 내역 이벤트 올라왔을 때
-     *
+     * <p>
      * 1. 재고 확인 및 차감
      * 2. stock-result 이벤트 발행하기
      */
@@ -46,21 +45,21 @@ public class StockConsumer {
 //            topics = "reservation_created",
 //            groupId = "stock-group"
 //    )
-    public void reservationSuccess(Reservation event){
+    public void reservationSuccess(Reservation event) {
 
         // 1. 재고 확인 및 차감
         boolean stockServiceCheck = productService.stockService(event);
 
         // 2. 만약 1번에서 실패했다면, 결과로 구매 실패로 상태 바꾸기
-        if(!stockServiceCheck){
+        if (!stockServiceCheck) {
             event.purchaseFailed();
-            log.info("{}님의 주문이 재고 확인 및 처리가 실패되었습니다!",event.getBuyerName());
+            log.info("{}님의 주문이 재고 확인 및 처리가 실패되었습니다!", event.getBuyerName());
         }
 
         // 3. 구매 성공했다면, 결과로 구매 성공으로 상태 바꾸기
         else {
             event.purchaseConfirmed(); // 구매 성공으로 상태 바꾸기
-            log.info("{}님의 주문이 재고 확인 및 처리가 완료되었습니다!",event.getBuyerName());
+            log.info("{}님의 주문이 재고 확인 및 처리가 완료되었습니다!", event.getBuyerName());
         }
 
         // 4. stock-result 이벤트 발행하기
@@ -75,20 +74,20 @@ public class StockConsumer {
 //            topics = "reservation_created",
 //            groupId = "stock-group"
 //    )
-    public void reservationSuccessV2(Reservation event){
+    public void reservationSuccessV2(Reservation event) {
 
         // 1. 재고 확인 및 차감
         boolean stockServiceCheck = productService.stockServiceV2(event);
 
-        if(!stockServiceCheck){
+        if (!stockServiceCheck) {
             event.purchaseFailed();
-            log.info("{}님의 주문이 재고 확인 및 처리가 실패되었습니다!",event.getBuyerName());
+            log.info("{}님의 주문이 재고 확인 및 처리가 실패되었습니다!", event.getBuyerName());
         }
 
         // 3. 구매 성공했다면, 결과로 구매 성공으로 상태 바꾸기
         else {
             event.purchaseConfirmed(); // 구매 성공으로 상태 바꾸기
-            log.info("{}님의 주문이 재고 확인 및 처리가 완료되었습니다!",event.getBuyerName());
+            log.info("{}님의 주문이 재고 확인 및 처리가 완료되었습니다!", event.getBuyerName());
         }
 
         // 4. stock-result 이벤트 발행하기
@@ -98,21 +97,21 @@ public class StockConsumer {
 
     /**
      * V3. 레디스 Lua Script 를 통해 DB로 접근하지 않고, Redis 에서만 재고 차감 후
-     *     성공 or 실패 이벤트 발행
-     *
+     * 성공 or 실패 이벤트 발행
+     * <p>
      * 기존 : DB 연산 작업이 1회 있었음
      * 변경 : DB 연산 작업 x, 대신 Memory DB 인 Redis 에서 연산 작업 1회로 성능 올리기
-     *
+     * <p>
      * -1 : 재고 없음
-     *  0 : 재고보다 주문 수량이 많음
-     *  1 : 주문 성공
+     * 0 : 재고보다 주문 수량이 많음
+     * 1 : 주문 성공
      */
 //    @KafkaListener(
 //            topics = "reservation_requested",
 //            groupId = "stock-group"
 ////            concurrency = "3" // 파티션 3개로 분할했기 때문에 병렬 처리 되도록 concurrency 3으로 설정
 //    )
-    public void reservationSuccessV3(KafkaEventReservation event){
+    public void reservationSuccessV3(KafkaEventReservation event) {
 
 //        log.info("🔥이거 제품 수량 어떻게 들어오는가 !! : {}",String.valueOf(event.getQuantity()));
 
@@ -125,15 +124,11 @@ public class StockConsumer {
 
         // 2. 결과 확인하기
         Reservation reservation = new Reservation();
-        if(stockServiceCheck == -1L){ // 예약 실패 : 존재하지 않는 상품임
+        if (stockServiceCheck == -1L) { // 예약 실패 : 존재하지 않는 상품임
             reservation = new Reservation(event, ReservationStatus.PURCHASE_FAILED);
-        }
-
-        else if (stockServiceCheck == 0L){ // 예약 실패 : 품절된 상태
+        } else if (stockServiceCheck == 0L) { // 예약 실패 : 품절된 상태
             reservation = new Reservation(event, ReservationStatus.PURCHASE_FAILED);
-        }
-
-        else if (stockServiceCheck == 1L){ // 주문 성공 :
+        } else if (stockServiceCheck == 1L) { // 주문 성공 :
             reservation = new Reservation(event, ReservationStatus.PURCHASE_CONFIRMED);
         }
 
@@ -144,23 +139,24 @@ public class StockConsumer {
 
 
     @KafkaListener(
-        topics = "reservation_requested",
-        groupId = "stock-group"
-        // concurrency = "3" // 파티션 3개로 분할했기 때문에 병렬 처리 되도록 concurrency 3으로 설정
+            topics = "reservation_requested",
+            groupId = "stock-group"
+            // concurrency = "3" // 파티션 3개로 분할했기 때문에 병렬 처리 되도록 concurrency 3으로 설정
     )
-    public void reservationSuccessV4(KafkaEventReservationRequest event){
+    public void reservationSuccessV4(KafkaEventReservationRequest event) {
 
         // 1. 이벤트에서 꺼내온 제품에 수량만큼 재고 감소하기 (원자 처리)
         // -> 단, 해당 기능은 빠르게 진행되지 않아도 괜찮음으로 비동기 처리 후 바로 결과 이벤트를 발행해 줄 예정
         // -> 만약 비동기 처리 과정에서 오류가 발생한다면 그때 다시 예매 이벤트 재발행
+        productService.stockServiceV4(event); // 비동기실행
 
 
-
-
-
+        // 2. 카프카 이벤트 발행
+        KafkaEventStockResult kafkaEventStockResult = new KafkaEventStockResult(event.getReservationId(), ReservationStatus.PURCHASE_CONFIRMED);
+        kafkaTemplateV2.send(STOCK_TOPIC, kafkaEventStockResult);
+        log.info("🤗 주문번호 {} 의 주문이 완료되었습니다 !! ", event.getReservationId());
 
     }
-
 
 
 }

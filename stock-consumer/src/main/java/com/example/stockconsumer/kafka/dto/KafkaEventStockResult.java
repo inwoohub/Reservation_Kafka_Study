@@ -7,12 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class KafkaEventReservationRequest {
+public class KafkaEventStockResult {
 
     private Long reservationId;
 
-    private Long productId;
-
-    private Integer quantity;
+    ReservationStatus reservationStatus;
 
 }
