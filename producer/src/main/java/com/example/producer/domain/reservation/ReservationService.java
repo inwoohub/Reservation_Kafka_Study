@@ -15,6 +15,7 @@ import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final KafkaTemplate<String, KafkaEventReservation> kafkaTemplate;
@@ -125,6 +127,7 @@ public class ReservationService {
      * 3. 예매 내역 이벤트 발행 (2번 성공 시 에만)
      * 4. 예매 결과 반환
      */
+    @Transactional
     public boolean addReservationV3(CreateReservationRequest req) {
 
         // 1. 제품 정보 꺼내오기
@@ -152,6 +155,7 @@ public class ReservationService {
             // 예약 실패 저장
             Reservation reservation = new Reservation(eventId, orderId, req, ReservationStatus.PURCHASE_FAILED, totalPrice, timestamp);
             reservationRepository.save(reservation);
+            log.info("addReservationV3 Error : 상품이 존재하지 않음 !!");
             return false;
         }
 
@@ -160,6 +164,7 @@ public class ReservationService {
             // 예약 실패 저장
             Reservation reservation = new Reservation(eventId, orderId, req, ReservationStatus.PURCHASE_FAILED, totalPrice, timestamp);
             reservationRepository.save(reservation);
+            log.info("addReservationV3 Error : 재고보다 주문 수량이 많음 !!");
             return false;
         }
 

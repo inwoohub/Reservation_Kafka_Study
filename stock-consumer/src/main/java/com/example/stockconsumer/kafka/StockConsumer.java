@@ -2,6 +2,7 @@ package com.example.stockconsumer.kafka;
 
 import com.example.stockconsumer.domain.product.ProductService;
 import com.example.stockconsumer.kafka.dto.KafkaEventReservation;
+import com.example.stockconsumer.kafka.dto.KafkaEventReservationRequest;
 import com.example.stockconsumer.kafka.dto.Reservation;
 import com.example.stockconsumer.kafka.dto.ReservationStatus;
 import lombok.RequiredArgsConstructor;
@@ -106,11 +107,11 @@ public class StockConsumer {
      *  0 : 재고보다 주문 수량이 많음
      *  1 : 주문 성공
      */
-    @KafkaListener(
-            topics = "reservation_requested",
-            groupId = "stock-group"
-//            concurrency = "3" // 파티션 3개로 분할했기 때문에 병렬 처리 되도록 concurrency 3으로 설정
-    )
+//    @KafkaListener(
+//            topics = "reservation_requested",
+//            groupId = "stock-group"
+////            concurrency = "3" // 파티션 3개로 분할했기 때문에 병렬 처리 되도록 concurrency 3으로 설정
+//    )
     public void reservationSuccessV3(KafkaEventReservation event){
 
 //        log.info("🔥이거 제품 수량 어떻게 들어오는가 !! : {}",String.valueOf(event.getQuantity()));
@@ -140,6 +141,26 @@ public class StockConsumer {
         kafkaTemplate.send(STOCK_TOPIC, reservation);
 
     }
+
+
+    @KafkaListener(
+        topics = "reservation_requested",
+        groupId = "stock-group"
+        // concurrency = "3" // 파티션 3개로 분할했기 때문에 병렬 처리 되도록 concurrency 3으로 설정
+    )
+    public void reservationSuccessV4(KafkaEventReservationRequest event){
+
+        // 1. 이벤트에서 꺼내온 제품에 수량만큼 재고 감소하기 (원자 처리)
+        // -> 단, 해당 기능은 빠르게 진행되지 않아도 괜찮음으로 비동기 처리 후 바로 결과 이벤트를 발행해 줄 예정
+        // -> 만약 비동기 처리 과정에서 오류가 발생한다면 그때 다시 예매 이벤트 재발행
+
+
+
+
+
+
+    }
+
 
 
 }
