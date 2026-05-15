@@ -141,7 +141,6 @@ public class StockConsumer {
     @KafkaListener(
             topics = "reservation_requested",
             groupId = "stock-group"
-            // concurrency = "3" // 파티션 3개로 분할했기 때문에 병렬 처리 되도록 concurrency 3으로 설정
     )
     public void reservationSuccessV4(KafkaEventReservationRequest event) {
 
