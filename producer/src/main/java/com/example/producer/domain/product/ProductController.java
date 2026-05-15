@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "1. ProductController", description = "상품 추가용 API")
 @RestController
@@ -36,8 +37,9 @@ public class ProductController {
     // 판매 중인 상태만 조회
     @Operation(summary = "판매 중인 상품만 조회")
     @GetMapping("/selling")
-    public ResponseEntity<List<Product>> getSellingProducts() {
-        List<Product> products = productService.getSellingAll();
+    public ResponseEntity<Map<Object, Object>> getSellingProducts() {
+//        List<Product> products = productService.getSellingAll();
+        Map<Object, Object> products = productService.getSellingAllV2();
         return ResponseEntity.status(HttpStatus.OK).body(products);
     }
 

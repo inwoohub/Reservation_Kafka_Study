@@ -109,14 +109,17 @@ public class StockConsumer {
     @KafkaListener(
             topics = "reservation_requested",
             groupId = "stock-group"
+//            concurrency = "3" // 파티션 3개로 분할했기 때문에 병렬 처리 되도록 concurrency 3으로 설정
     )
     public void reservationSuccessV3(KafkaEventReservation event){
+
+//        log.info("🔥이거 제품 수량 어떻게 들어오는가 !! : {}",String.valueOf(event.getQuantity()));
 
         // 1. Redis 에서 Lua Script 활용해서 재고 차감
         Long stockServiceCheck = redisTemplate.execute(
                 decreaseStockScript,
                 List.of(PRODUCT_STOCK_PREFIX + event.getProductId()),
-                String.valueOf(event.getQuantity())
+                event.getQuantity()
         );
 
         // 2. 결과 확인하기

@@ -56,8 +56,8 @@ public class ReservationHistoryConsumer {
     @KafkaListener(
             topics = "stock-result",
             groupId = "reservation-result-group",
-            containerFactory = "stockResultKafkaListenerContainerFactory"
-//            concurrency = "3" // 파티션 3개로 분할했기 때문에 병렬 처리 되도록 concurrency 3으로 설정
+            containerFactory = "stockResultKafkaListenerContainerFactory",
+            concurrency = "3" // 파티션 3개로 분할했기 때문에 병렬 처리 되도록 concurrency 3으로 설정
     )
     public void stockResult(KafkaEventStockResult event) {
         // 1. 스탁 결과에서 예약 상태 가져와서 예약 상태 변경 시키기
