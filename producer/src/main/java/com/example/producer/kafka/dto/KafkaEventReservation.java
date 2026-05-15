@@ -1,12 +1,12 @@
-package com.example.producer.domain.reservation.dto;
+package com.example.producer.kafka.dto;
 
 import com.example.producer.domain.product.Product;
 import com.example.producer.domain.product.ProductStatus;
+import com.example.producer.domain.reservation.dto.CreateReservationRequest;
+import com.example.producer.domain.reservation.dto.ReservationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Map;
 
 @Data
 @AllArgsConstructor

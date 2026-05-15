@@ -32,6 +32,7 @@ public class StockConsumer {
     private final RedisTemplate<String, Object> redisTemplate;
 
     private static final String PRODUCT_STOCK_PREFIX = "product:stock:";
+
     private final KafkaAdmin kafkaAdmin;
 
 

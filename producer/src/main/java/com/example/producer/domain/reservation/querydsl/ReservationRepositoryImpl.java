@@ -1,12 +1,11 @@
 package com.example.producer.domain.reservation.querydsl;
 
 
-import com.example.producer.domain.reservation.QReservation;
 import com.example.producer.domain.reservation.dto.ReservationStatus;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
-import static com.example.producer.domain.reservation.QReservation.*;
+import static com.example.producer.domain.reservation.QReservation.reservation;
 
 @RequiredArgsConstructor
 public class ReservationRepositoryImpl implements ReservationRepositoryQuerydsl {

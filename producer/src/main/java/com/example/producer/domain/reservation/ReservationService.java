@@ -4,10 +4,11 @@ import com.example.producer.domain.product.Product;
 import com.example.producer.domain.product.ProductRepository;
 import com.example.producer.domain.product.ProductStatus;
 import com.example.producer.domain.reservation.dto.CreateReservationRequest;
-import com.example.producer.domain.reservation.dto.KafkaEventReservation;
-import com.example.producer.domain.reservation.dto.KafkaEventReservationRequest;
+import com.example.producer.kafka.dto.KafkaEventReservation;
+import com.example.producer.kafka.dto.KafkaEventReservationRequest;
 import com.example.producer.domain.reservation.dto.ReservationStatus;
 import com.example.producer.global.error.ApiException;
+import com.example.producer.kafka.dto.KafkaEventStockResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -184,7 +185,11 @@ public class ReservationService {
         return true;
     }
 
+    @Transactional
+    public boolean updateStatus(KafkaEventStockResult event) {
 
+        // 업데이트 원자 처리
+        return reservationRepository.setReservationStatus(event.getReservationId(), event.getReservationStatus());
 
-
+    }
 }

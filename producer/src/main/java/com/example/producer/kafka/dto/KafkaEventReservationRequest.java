@@ -1,4 +1,4 @@
-package com.example.producer.domain.reservation.dto;
+package com.example.producer.kafka.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
