@@ -1,5 +1,6 @@
 package com.example.producer.domain.reservation;
 
+import com.example.producer.domain.reservation.dto.CreateReservationRequest;
 import com.example.producer.domain.reservation.dto.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -47,4 +48,17 @@ public class Reservation {
 
     private LocalDateTime createdAt; // 예약 내역이 생성된 시간
 
+    public Reservation(String eventId, String orderId, CreateReservationRequest req, ReservationStatus reservationStatus, int totalPrice, Long timestamp) {
+        this.eventId = eventId;
+        this.orderId = orderId;
+        this.productId = req.getProductId();
+        this.quantity = req.getQuantity();
+        this.totalPrice = totalPrice;
+        this.buyerName = req.getBuyerName();
+        this.birthDate = req.getBirthDate();
+        this.tempPassword = req.getTeamPassword();
+        this.reservationStatus = reservationStatus;
+        this.timestamp = timestamp;
+        this.createdAt = LocalDateTime.now();
+    }
 }

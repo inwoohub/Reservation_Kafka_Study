@@ -1,6 +1,7 @@
 package com.example.producer.domain.reservation;
 
 import com.example.producer.domain.reservation.dto.CreateReservationRequest;
+import com.example.producer.global.error.ApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +22,16 @@ public class ReservationController {
 
     @Operation(summary = "예매하기")
     @PostMapping
-    public ResponseEntity<Void> createReservation(@RequestBody CreateReservationRequest req) {
+    public ResponseEntity<String> createReservation(@RequestBody CreateReservationRequest req) {
 //        reservationService.addReservation(req); // 이전 버전
-        reservationService.addReservationV2(req); // 성능 개선 버전
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+//        reservationService.addReservationV2(req); // 성능 개선 버전
+        boolean result = reservationService.addReservationV3(req);// 최종 아키텍처 버전
+        if(!result) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "400", "BAD_REQUEST", "예약이 실패하였습니다.");
+        }
+        return ResponseEntity.status(202).body("예약 신청이 완료되었습니다.");
     }
 
-    
+
 
 }
