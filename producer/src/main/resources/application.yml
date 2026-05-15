@@ -23,6 +23,32 @@ spring:
   # 2. 따라서 바이트 스트림으로 변환 즉, 직렬화가 필요함
   # 3. 또한 다른 서비스에서 언어 간에 데이터를 주고 받을 때, 직렬화된 형태를 통해 호환성을 높일 수 있음
 
+    # consumer 설정
+    consumer:
+      group-id: stock-group
+      # group-id : kafka에서 Consumer 는 group 단위로 offset 을 처리함
+      #            즉, 어디까지 읽었는지를 확인하기 위함임.
+      #            같은 group-id 를 쓰는 Consumer 들은 일을 나눠서 처리함 ( 여기서 병렬 처리가 가능한거같음 )
+      #            다른 group-id 를 쓴다면 Consumer 들은 같은 메시지를 또 읽어옴 ( 컨슈머가 서로 다른 역할을 할 때 좋아보임 )
+      auto-offset-reset: earliest
+      # auto-offset-reset : earliest는 처음 실행하는 Consumer Group 이면, 가장 오래된 메시지부터 읽겠다라는 설정임
+      #                     lateset 는 Consumer 가 실행된 이후 새로 들어오는 메시지만 읽겠다라는 설정도 가능함
+      #                     학습용오르노느 earliest 를 추천한다고 함.
+
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      # kafka 메시지의 key를 String 읽겠다라는 설정
+
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      # Kafka 에 JSON으로 보낸것을 다시 Java 객체로 바꾸는 설정임 DTO 를 통해 가능해보임.
+
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.value.default.type: com.example.stockconsumer.kafka.dto.KafkaEventReservationRequest
+      # JsonDeserializer 의 추가 설정
+      # 1packages : "*" 은 카프카 보안상 아무 JSON 역직렬화 시도x 다만 , * 로 설정했으니 일단 모든 패키지 열어두는 설정임.
+      #           ex) com.example.reservationhistoryconsumer.kafka.dto 처럼 내껏만 열어두는 설정도 가능함
+      # default.type 은 Kafka 에서 받은 JSON 을 어떤 Java클래스로 바꿀지 설정. (프로듀서랑 맞춰야겠다.)
+
     properties:
       spring.json.add.type.headers: false
       # 헤더의 TypeId 가 들어가며, 해당 객체 경로 때문에 Consumer 에서 오류 발생함으로 헤더에 타입을 넣는 것을 끄는 옵션
