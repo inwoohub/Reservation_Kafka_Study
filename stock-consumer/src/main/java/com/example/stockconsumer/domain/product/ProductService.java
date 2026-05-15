@@ -107,16 +107,12 @@ public class ProductService {
         return true;
     }
 
-    @Async
     @Transactional
-    public void stockServiceV4(KafkaEventReservationRequest event) {
+    public boolean stockServiceV4(KafkaEventReservationRequest event) {
         // 1. 구매자 수량 확인하기
         if (event.getQuantity() == null || event.getQuantity() <= 0) {
             log.info("구매자 주문 수량이 음수거나 null값 입니다.");
-            // 예매 실패 이벤트 발행
-            KafkaEventStockResult kafkaEventStockResult = new KafkaEventStockResult(event.getReservationId(), ReservationStatus.PURCHASE_FAILED);
-            kafkaTemplateV2.send(STOCK_TOPIC, kafkaEventStockResult);
-            return;
+            return false;
         }
 
         // 2. 재고 업데이트 원자 처리
@@ -129,12 +125,10 @@ public class ProductService {
 
         if (!decreaseStockCheck) {
             log.info("MySQL 재고 연산 과정에서 오류 발생했습니다.");
-            // 예매 실패 이벤트 발행
-            KafkaEventStockResult kafkaEventStockResult = new KafkaEventStockResult(event.getReservationId(), ReservationStatus.PURCHASE_FAILED);
-            kafkaTemplateV2.send(STOCK_TOPIC, kafkaEventStockResult);
-            return;
+            return false;
         }
-        log.info("MySQL에서 제품이 성공적으로 감소되었습니다. 주문수량 = {} 입니다.", event.getQuantity());
+
+        return true;
     }
 
 

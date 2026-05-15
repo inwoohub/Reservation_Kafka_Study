@@ -147,13 +147,20 @@ public class StockConsumer {
         // 1. 이벤트에서 꺼내온 제품에 수량만큼 재고 감소하기 (원자 처리)
         // -> 단, 해당 기능은 빠르게 진행되지 않아도 괜찮음으로 비동기 처리 후 바로 결과 이벤트를 발행해 줄 예정
         // -> 만약 비동기 처리 과정에서 오류가 발생한다면 그때 다시 예매 이벤트 재발행
-        productService.stockServiceV4(event); // 비동기실행
+
+        // 1. 위에 처럼 했다가 Error 맛 보고 동기 실행으로 변경
+        // -> 결과에 따라 분기를 통해 이벤트 발행
+        boolean stockResult = productService.stockServiceV4(event);// 동기 실행
 
 
         // 2. 카프카 이벤트 발행
-        KafkaEventStockResult kafkaEventStockResult = new KafkaEventStockResult(event.getReservationId(), ReservationStatus.PURCHASE_CONFIRMED);
-        kafkaTemplateV2.send(STOCK_TOPIC, kafkaEventStockResult);
-        log.info("🤗 주문번호 {} 의 주문이 완료되었습니다 !! ", event.getReservationId());
+        if (!stockResult) {
+            kafkaTemplateV2.send(STOCK_TOPIC, new KafkaEventStockResult(event.getReservationId(), ReservationStatus.PURCHASE_FAILED));
+            log.info("❌ 주문번호 {} 의 주문이 실패되었습니다 !! ", event.getReservationId());
+        } else {
+            kafkaTemplateV2.send(STOCK_TOPIC, new KafkaEventStockResult(event.getReservationId(), ReservationStatus.PURCHASE_CONFIRMED));
+            log.info("✅ 주문번호 {} 의 주문이 완료되었습니다 !! ", event.getReservationId());
+        }
 
     }
 
