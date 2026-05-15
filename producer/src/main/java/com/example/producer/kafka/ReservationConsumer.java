@@ -18,7 +18,7 @@ public class ReservationConsumer {
 
     @KafkaListener(
             topics = STOCK_TOPIC,
-            groupId = "stock-group"
+            groupId = "reservation-group"
     )
     public void reservationConsume(KafkaEventStockResult event) {
 
