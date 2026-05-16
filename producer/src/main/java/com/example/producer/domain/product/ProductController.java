@@ -37,9 +37,9 @@ public class ProductController {
     // 판매 중인 상태만 조회
     @Operation(summary = "판매 중인 상품만 조회")
     @GetMapping("/selling")
-    public ResponseEntity<Map<Object, Object>> getSellingProducts() {
+    public ResponseEntity<List<Map<String, Object>>> getSellingProducts() {
 //        List<Product> products = productService.getSellingAll();
-        Map<Object, Object> products = productService.getSellingAllV2();
+        List<Map<String, Object>> products = productService.getSellingAllV2();
         return ResponseEntity.status(HttpStatus.OK).body(products);
     }
 

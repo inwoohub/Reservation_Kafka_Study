@@ -13,7 +13,6 @@ public class ReservationRepositoryImpl implements ReservationRepositoryQuerydsl 
 
     @Override
     public boolean setReservationStatus(Long id, ReservationStatus reservationStatus) {
-
         long updateCount = jpaQueryFactory
                 .update(reservation)
                 .set(reservation.reservationStatus, reservationStatus)
@@ -23,6 +22,5 @@ public class ReservationRepositoryImpl implements ReservationRepositoryQuerydsl 
                 .execute();
 
         return updateCount == 1L;
-
     }
 }

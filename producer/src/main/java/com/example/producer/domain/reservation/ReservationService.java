@@ -4,6 +4,7 @@ import com.example.producer.domain.product.Product;
 import com.example.producer.domain.product.ProductRepository;
 import com.example.producer.domain.product.ProductStatus;
 import com.example.producer.domain.reservation.dto.CreateReservationRequest;
+import com.example.producer.domain.reservation.dto.GetReservationRequest;
 import com.example.producer.kafka.dto.KafkaEventReservation;
 import com.example.producer.kafka.dto.KafkaEventReservationRequest;
 import com.example.producer.domain.reservation.dto.ReservationStatus;
@@ -38,7 +39,7 @@ public class ReservationService {
 
     private final RedisScript<Long> decreaseStockScript; // RedisConfig 에서 Bean으로 만든 스크립트 주입 받기
 
-    private static final String PRODUCT_PREFIX = "product:";
+    private static final String PRODUCT_PREFIX = "product:info:";
     private static final String PRODUCT_STOCK_PREFIX = "product:stock:";
     private final ReservationRepository reservationRepository;
 
@@ -190,6 +191,20 @@ public class ReservationService {
 
         // 업데이트 원자 처리
         return reservationRepository.setReservationStatus(event.getReservationId(), event.getReservationStatus());
+
+    }
+
+    // 해당 유저의 맞는 정보로 조회
+    public List<Reservation> getAllReservations(GetReservationRequest req) {
+
+        // 조회해서 반환
+        List<Reservation> allReservation = reservationRepository.getAllReservation(req.getBuyerName(), req.getBirthDate(), req.getTeamPassword());
+
+        if(allReservation.isEmpty()) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "404", "NOT_FOUND", "회원정보와 일치하는 예약 내역이 없습니다.");
+        }
+
+        return allReservation;
 
     }
 }

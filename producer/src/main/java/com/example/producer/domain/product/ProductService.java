@@ -2,15 +2,15 @@ package com.example.producer.domain.product;
 
 import com.example.producer.domain.product.dto.CreateProductRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -20,7 +20,7 @@ public class ProductService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    private static final String PRODUCT_PREFIX = "product:";
+    private static final String PRODUCT_PREFIX = "product:info:";
     private static final String PRODUCT_STOCK_PREFIX = "product:stock:";
 
     @Transactional
@@ -59,12 +59,54 @@ public class ProductService {
 
 
     // 판매중인 제품만 조회 (Redis 활용)
-    public Map<Object, Object> getSellingAllV2() {
+    public List<Map<String, Object>> getSellingAllV2() {
 
-        // 판매중인 제품 모두 가져오기 (레디스에 올라가 있다면 전부 판매중인 것)
-        Map<Object, Object> entries = redisTemplate.opsForHash().entries(PRODUCT_PREFIX);
+        Set<String> infoKeys = redisTemplate.keys(PRODUCT_PREFIX + "*");
+        Set<String> stockKeys = redisTemplate.keys(PRODUCT_STOCK_PREFIX + "*");
 
-        return entries;
+        // 비어있는 경우 비어있는 리스트로 반환
+        if (infoKeys.isEmpty() && stockKeys.isEmpty()) {
+            return List.of();
+        }
+
+        // 반환용 빈 결과 리스트 생성
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        // info 키를 기준으로 탐색시작
+        for (String key : infoKeys) {
+
+            // 물건 정보 가져오기
+            Object productValue = redisTemplate.opsForValue().get(key);
+
+            // productValue가 Map 타입이면 productMap이라는 이름으로 꺼내서 쓰고, Map 타입이 아니면 이번 반복은 건너뜀
+            if (!(productValue instanceof Map<?, ?> productMap)) {
+                continue;
+            }
+
+            // 맵 객체 하나 만듦
+            Map<String, Object> product = new HashMap<>();
+
+            // productMap 으로 꺼낸거 돌면서 하나씩 꺼내면서 product 에 넣어주기
+            for (Map.Entry<?, ?> entry : productMap.entrySet()) {
+                product.put(String.valueOf(entry.getKey()), entry.getValue());
+            }
+
+            // Id만 따로 꺼내서 스트링으로 변환
+            String productId = String.valueOf(product.get("productId"));
+
+            // Id 만 따로 꺼내서 수량도 꺼내오기
+            Object stock = redisTemplate.opsForValue()
+                    .get(PRODUCT_STOCK_PREFIX + productId);
+
+            // 수량도 담아주기
+            product.put("stock", stock);
+
+            // 만든 Map 객체 리스트에 더하기
+            result.add(product);
+        }
+
+        return result;
+
     }
 
 }
