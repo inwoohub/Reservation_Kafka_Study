@@ -3,9 +3,11 @@ package com.example.producer.domain.reservation;
 import com.example.producer.domain.product.Product;
 import com.example.producer.domain.product.ProductRepository;
 import com.example.producer.domain.product.ProductStatus;
+import com.example.producer.domain.reservation.dto.CancelReservationRequest;
 import com.example.producer.domain.reservation.dto.CreateReservationRequest;
 import com.example.producer.domain.reservation.dto.GetReservationRequest;
 import com.example.producer.kafka.dto.KafkaEventReservation;
+import com.example.producer.kafka.dto.KafkaEventReservationCancel;
 import com.example.producer.kafka.dto.KafkaEventReservationRequest;
 import com.example.producer.domain.reservation.dto.ReservationStatus;
 import com.example.producer.global.error.ApiException;
@@ -31,6 +33,9 @@ public class ReservationService {
 
     private final KafkaTemplate<String, KafkaEventReservation> kafkaTemplate;
     private final KafkaTemplate<String, KafkaEventReservationRequest> kafkaTemplateV2;
+
+    private final KafkaTemplate<String, KafkaEventReservationCancel> kafkaTemplateCancel;
+
     private final ProductRepository productRepository;
 
     private final String REQUEST_TOPIC = "reservation_requested";
@@ -200,11 +205,33 @@ public class ReservationService {
         // 조회해서 반환
         List<Reservation> allReservation = reservationRepository.getAllReservation(req.getBuyerName(), req.getBirthDate(), req.getTeamPassword());
 
-        if(allReservation.isEmpty()) {
+        if (allReservation.isEmpty()) {
             throw new ApiException(HttpStatus.NOT_FOUND, "404", "NOT_FOUND", "회원정보와 일치하는 예약 내역이 없습니다.");
         }
 
         return allReservation;
 
     }
+
+    // 예약 취소하기
+    public void cancelReservation(CancelReservationRequest req) {
+
+        // 예약이 존재하는지 확인하기
+        Reservation reservation = reservationRepository.findById(req.getId())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "404", "NOT_FOUND", "존재하지 않는 예약 ID입니다."));
+
+        // 예약 상태가 성공이었는지 확인하기
+        if(!reservation.getReservationStatus().equals(ReservationStatus.CANCEL_COMPLETED)){
+            throw new ApiException(HttpStatus.BAD_REQUEST, "400", "BAD_REQUEST", "성공한 예약이 아님으로 취소할 수 없습니다.");
+        }
+
+        KafkaEventReservationCancel kafkaEventReservationCancel = new KafkaEventReservationCancel(reservation.getId(), reservation.getProductId(), reservation.getQuantity());
+
+        // 카프카 이벤트 발행하기
+        kafkaTemplateCancel.send(REQUEST_TOPIC, kafkaEventReservationCancel);
+
+        // 예매할 떄는 바로 재고 차감 했지만 혹시모르니 재고 증가는 가장 마지막에 처리하기로!
+
+    }
+
 }

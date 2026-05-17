@@ -1,5 +1,6 @@
 package com.example.producer.domain.reservation;
 
+import com.example.producer.domain.reservation.dto.CancelReservationRequest;
 import com.example.producer.domain.reservation.dto.CreateReservationRequest;
 import com.example.producer.domain.reservation.dto.GetReservationRequest;
 import com.example.producer.global.error.ApiException;
@@ -37,6 +38,13 @@ public class ReservationController {
     public ResponseEntity<List<Reservation>> getAllReservations(@RequestBody GetReservationRequest req) {
         List<Reservation> allReservations = reservationService.getAllReservations(req);
         return ResponseEntity.status(HttpStatus.OK).body(allReservations);
+    }
+
+    @Operation(summary = "예매 취소하기")
+    @PostMapping("/cancel")
+    public ResponseEntity<Void> cancelReservation(@RequestBody CancelReservationRequest req) {
+        reservationService.cancelReservation(req);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 
