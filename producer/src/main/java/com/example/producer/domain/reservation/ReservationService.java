@@ -34,8 +34,6 @@ public class ReservationService {
     private final KafkaTemplate<String, KafkaEventReservation> kafkaTemplate;
     private final KafkaTemplate<String, KafkaEventReservationRequest> kafkaTemplateV2;
 
-    private final KafkaTemplate<String, KafkaEventReservationCancel> kafkaTemplateCancel;
-
     private final ProductRepository productRepository;
 
     private final String REQUEST_TOPIC = "reservation_requested";
@@ -182,7 +180,7 @@ public class ReservationService {
             Reservation saved = reservationRepository.save(reservation);
 
             // 3. 예매 요청 이벤트 발행
-            KafkaEventReservationRequest kafkaEventReservationRequest = new KafkaEventReservationRequest(saved.getId(), saved.getProductId(), saved.getQuantity());
+            KafkaEventReservationRequest kafkaEventReservationRequest = new KafkaEventReservationRequest(saved.getId(), saved.getProductId(), saved.getQuantity(), ReservationStatus.PURCHASE_REQUESTED);
             kafkaTemplateV2.send(REQUEST_TOPIC, kafkaEventReservationRequest);
 
         }
@@ -216,6 +214,10 @@ public class ReservationService {
     // 예약 취소하기
     public void cancelReservation(CancelReservationRequest req) {
 
+        if(req.getId() == null){
+            throw new ApiException(HttpStatus.BAD_REQUEST, "400", "BAD_REQUEST", "reservationID 가 null 입니다.");
+        }
+
         // 예약이 존재하는지 확인하기
         Reservation reservation = reservationRepository.findById(req.getId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "404", "NOT_FOUND", "존재하지 않는 예약 ID입니다."));
@@ -225,10 +227,16 @@ public class ReservationService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "400", "BAD_REQUEST", "성공한 예약이 아님으로 취소할 수 없습니다.");
         }
 
-        KafkaEventReservationCancel kafkaEventReservationCancel = new KafkaEventReservationCancel(reservation.getId(), reservation.getProductId(), reservation.getQuantity());
+        // 예약 비밀번호 검증하기
+        if(!req.getTeamPassword().equals(reservation.getTempPassword())){
+            throw new ApiException(HttpStatus.BAD_REQUEST, "400", "BAD_REQUEST", "예약 시 사용했던 비밀번호가 틀렸습니다..");
+        }
+
+        // 예매 취소 신청으로 으로 으로 상태 담기
+        KafkaEventReservationRequest kafkaEventReservationRequest = new KafkaEventReservationRequest(reservation.getId(), reservation.getProductId(), reservation.getQuantity(), ReservationStatus.CANCEL_REQUESTED);
 
         // 카프카 이벤트 발행하기
-        kafkaTemplateCancel.send(REQUEST_TOPIC, kafkaEventReservationCancel);
+        kafkaTemplateV2.send(REQUEST_TOPIC, kafkaEventReservationRequest);
 
         // 예매할 떄는 바로 재고 차감 했지만 혹시모르니 재고 증가는 가장 마지막에 처리하기로!
 

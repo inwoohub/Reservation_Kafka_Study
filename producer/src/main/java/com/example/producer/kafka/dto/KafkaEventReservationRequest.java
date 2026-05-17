@@ -1,5 +1,6 @@
 package com.example.producer.kafka.dto;
 
+import com.example.producer.domain.reservation.dto.ReservationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,5 +15,7 @@ public class KafkaEventReservationRequest {
     private Long productId;
 
     private int quantity;
+
+    private ReservationStatus reservationStatus;
 
 }
