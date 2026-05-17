@@ -53,5 +53,29 @@ public class RedisScriptConfig {
         return script;
     }
 
+    @Bean
+    public RedisScript<Long> increaseStockScript() {
+        String lua = """
+                local stock = redis.call('GET', KEYS[1])
+                
+                if not stock then
+                    return -1
+                end
+                
+                local quantity = tonumber(ARGV[1])
+                
+                if not quantity or quantity <= 0 then
+                    return 0
+                end
+                
+                redis.call('INCRBY', KEYS[1], quantity)
+                return 1
+            """;
+        DefaultRedisScript<Long> script = new DefaultRedisScript<>();
+        script.setScriptText(lua);
+        script.setResultType(Long.class);
+        return script;
+    }
+
 
 }
