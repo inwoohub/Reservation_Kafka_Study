@@ -223,7 +223,7 @@ public class ReservationService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "404", "NOT_FOUND", "존재하지 않는 예약 ID입니다."));
 
         // 예약 상태가 성공이었는지 확인하기
-        if(!reservation.getReservationStatus().equals(ReservationStatus.CANCEL_COMPLETED)){
+        if(!reservation.getReservationStatus().equals(ReservationStatus.PURCHASE_CONFIRMED)){
             throw new ApiException(HttpStatus.BAD_REQUEST, "400", "BAD_REQUEST", "성공한 예약이 아님으로 취소할 수 없습니다.");
         }
 
