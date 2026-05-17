@@ -11,6 +11,6 @@ public class KafkaEventStockResult {
 
     private Long reservationId;
 
-    ReservationStatus reservationStatus;
+    private ReservationStatus reservationStatus;
 
 }
