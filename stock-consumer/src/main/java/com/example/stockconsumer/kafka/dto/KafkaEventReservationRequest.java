@@ -15,4 +15,6 @@ public class KafkaEventReservationRequest {
 
     private Integer quantity;
 
+    private ReservationStatus reservationStatus;
+
 }

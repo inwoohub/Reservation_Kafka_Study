@@ -10,6 +10,7 @@ public enum ReservationStatus {
 
     // 2. 취소 관련 상태
     CANCEL_REQUESTED,       // 사용자가 취소 API를 호출했을 때
-    CANCEL_COMPLETED        // 컨슈머가 재고를 다시 +1 하고 취소 처리 완료했을 때
+    CANCEL_COMPLETED,       // 컨슈머가 재고를 다시 +1 하고 취소 처리 완료했을 때
+    CANCEL_FAILED,          // 취소 실패 상태
 
 }

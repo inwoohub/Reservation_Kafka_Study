@@ -46,4 +46,17 @@ public class ProductRepositoryImpl implements ProductRepositoryQuerydsl {
         return updateCount == 1L;
     }
 
+    @Override
+    public boolean increaseStock(Long productId, Integer quantity, ProductStatus selling, ProductStatus closed) {
+        long updateCount = jpaQueryFactory
+                .update(product)
+                .set(product.stock, product.stock.add(quantity))
+                .set(product.status, ProductStatus.SELLING)
+                .where(
+                        product.id.eq(productId)
+                )
+                .execute(); // execute 에 반환값은 영향받은 row 수임.
+
+        return updateCount == 1L;
+    }
 }
