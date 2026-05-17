@@ -29,13 +29,13 @@ public class ProductRepositoryImpl implements ProductRepositoryQuerydsl {
 
         long updateCount = jpaQueryFactory
                 .update(product)
-                .set(product.stock, product.stock.subtract(quantity))
                 .set(
                         product.status, new CaseBuilder()
                                 .when(product.stock.subtract(quantity).eq(0))
                                 .then(ProductStatus.CLOSED)
                                 .otherwise((product.status))
                 )
+                .set(product.stock, product.stock.subtract(quantity))
                 .where(
                         product.id.eq(productId),
                         product.status.eq(selling),
