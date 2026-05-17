@@ -187,6 +187,7 @@ public class StockConsumer {
             }
 
         } else if (event.getReservationStatus().equals(ReservationStatus.CANCEL_REQUESTED)) {
+
             stockResult = productService.stockIncrease(event);
 
             if (!stockResult) {
