@@ -131,5 +131,53 @@ public class ProductService {
         return true;
     }
 
+    @Transactional
+    public boolean stockIncrease(KafkaEventReservationRequest event) {
+        // 1. 구매자 수량 확인하기
+        if (event.getQuantity() == null || event.getQuantity() <= 0) {
+            log.info("구매자 주문 수량이 음수거나 null값 입니다.");
+            return false;
+        }
+
+        // 2. 재고 업데이트 원자 처리
+        boolean decreaseStockCheck = productRepository.increaseStock(
+                event.getProductId(),
+                event.getQuantity(),
+                ProductStatus.SELLING,
+                ProductStatus.CLOSED
+        );
+
+        if (!decreaseStockCheck) {
+            log.info("MySQL 재고 연산 과정에서 오류 발생했습니다.");
+            return false;
+        }
+
+        return true;
+    }
+
+    @Transactional
+    public boolean stockDecrease(KafkaEventReservationRequest event) {
+        // 1. 구매자 수량 확인하기
+        if (event.getQuantity() == null || event.getQuantity() <= 0) {
+            log.info("구매자 주문 수량이 음수거나 null값 입니다.");
+            return false;
+        }
+
+        // 2. 재고 업데이트 원자 처리
+        boolean decreaseStockCheck = productRepository.decreaseStock(
+                event.getProductId(),
+                event.getQuantity(),
+                ProductStatus.SELLING,
+                ProductStatus.CLOSED
+        );
+
+        if (!decreaseStockCheck) {
+            log.info("MySQL 재고 연산 과정에서 오류 발생했습니다.");
+            return false;
+        }
+
+        return true;
+    }
+
 
 }

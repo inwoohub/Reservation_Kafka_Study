@@ -7,4 +7,6 @@ public interface ProductRepositoryQuerydsl {
 
     boolean decreaseStock(Long productId, Integer quantity, ProductStatus selling, ProductStatus closed);
 
+    boolean increaseStock(Long productId, Integer quantity, ProductStatus selling, ProductStatus closed);
+
 }

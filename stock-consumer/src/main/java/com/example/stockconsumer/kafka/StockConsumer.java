@@ -139,10 +139,10 @@ public class StockConsumer {
     }
 
 
-    @KafkaListener(
-            topics = "reservation_requested",
-            groupId = "stock-group"
-    )
+    //    @KafkaListener(
+//            topics = "reservation_requested",
+//            groupId = "stock-group"
+//    )
     public void reservationSuccessV4(KafkaEventReservationRequest event) {
 
         // 1. 이벤트에서 꺼내온 제품에 수량만큼 재고 감소하기 (원자 처리)
@@ -161,6 +161,42 @@ public class StockConsumer {
         } else {
             kafkaTemplateV2.send(STOCK_TOPIC, new KafkaEventStockResult(event.getReservationId(), ReservationStatus.PURCHASE_CONFIRMED));
             log.info("✅ 주문번호 {} 의 주문이 완료되었습니다 !! ", event.getReservationId());
+        }
+
+    }
+
+    @KafkaListener(
+            topics = "reservation_requested",
+            groupId = "stock-group"
+    )
+    public void reservationSuccessV5(KafkaEventReservationRequest event) {
+
+        boolean stockResult = false;
+
+        // 1. 예매 취소도 추가되었음으로 재고 증가 or 감소 분기 처리
+        if (event.getReservationStatus().equals(ReservationStatus.PURCHASE_REQUESTED)) {
+            stockResult = productService.stockDecrease(event);
+
+            // 2. 카프카 이벤트 발행
+            if (!stockResult) {
+                kafkaTemplateV2.send(STOCK_TOPIC, new KafkaEventStockResult(event.getReservationId(), ReservationStatus.PURCHASE_FAILED));
+                log.info("❌ 주문번호 {} 의 주문이 실패되었습니다 !! ", event.getReservationId());
+            } else {
+                kafkaTemplateV2.send(STOCK_TOPIC, new KafkaEventStockResult(event.getReservationId(), ReservationStatus.PURCHASE_CONFIRMED));
+                log.info("✅ 주문번호 {} 의 주문이 완료되었습니다 !! ", event.getReservationId());
+            }
+
+        } else if (event.getReservationStatus().equals(ReservationStatus.CANCEL_REQUESTED)) {
+            stockResult = productService.stockIncrease(event);
+
+            if (!stockResult) {
+                kafkaTemplateV2.send(STOCK_TOPIC, new KafkaEventStockResult(event.getReservationId(), ReservationStatus.CANCEL_FAILED));
+                log.info("❌ 주문번호 {} 의 취소 요청이 실패되었습니다 !! ", event.getReservationId());
+            } else {
+                kafkaTemplateV2.send(STOCK_TOPIC, new KafkaEventStockResult(event.getReservationId(), ReservationStatus.CANCEL_COMPLETED));
+                log.info("✅ 주문번호 {} 의 취소 요청이 완료되었습니다 !! ", event.getReservationId());
+            }
+
         }
 
     }
