@@ -25,6 +25,8 @@ public class ReservationConsumer {
         // 1. 예매 내역 상태 업데이트
         boolean result = reservationService.updateStatus(event);
 
+        // 2. 상태가 만약 취소 요청 성공이라면
+
         // 예매 내역 상태 업데이트 실패
         if (!result) {
             log.info("업데이트 과정에서 오류가 발생했습니다.");

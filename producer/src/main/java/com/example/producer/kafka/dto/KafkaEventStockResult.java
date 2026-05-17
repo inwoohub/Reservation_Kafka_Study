@@ -14,4 +14,6 @@ public class KafkaEventStockResult {
 
     private ReservationStatus reservationStatus;
 
+    private Integer quantity;
+
 }
