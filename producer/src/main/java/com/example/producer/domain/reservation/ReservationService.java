@@ -3,17 +3,15 @@ package com.example.producer.domain.reservation;
 import com.example.producer.domain.product.Product;
 import com.example.producer.domain.product.ProductRepository;
 import com.example.producer.domain.product.ProductStatus;
-import com.example.producer.domain.reservation.dto.CancelReservationRequest;
-import com.example.producer.domain.reservation.dto.CreateReservationRequest;
-import com.example.producer.domain.reservation.dto.GetReservationRequest;
+import com.example.producer.domain.reservation.dto.*;
 import com.example.producer.kafka.dto.KafkaEventReservation;
 import com.example.producer.kafka.dto.KafkaEventReservationCancel;
 import com.example.producer.kafka.dto.KafkaEventReservationRequest;
-import com.example.producer.domain.reservation.dto.ReservationStatus;
 import com.example.producer.global.error.ApiException;
 import com.example.producer.kafka.dto.KafkaEventStockResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.http.HttpStatus;
@@ -21,6 +19,8 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -200,6 +200,8 @@ public class ReservationService {
     // 해당 유저의 맞는 정보로 조회
     public List<Reservation> getAllReservations(GetReservationRequest req) {
 
+        log.info("비회원 예약 구매조회 이름 : = {}", req.getBuyerName());
+
         // 조회해서 반환
         List<Reservation> allReservation = reservationRepository.getAllReservation(req.getBuyerName(), req.getBirthDate(), req.getTeamPassword());
 
@@ -214,7 +216,7 @@ public class ReservationService {
     // 예약 취소하기
     public void cancelReservation(CancelReservationRequest req) {
 
-        if(req.getId() == null){
+        if (req.getId() == null) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "400", "BAD_REQUEST", "reservationID 가 null 입니다.");
         }
 
@@ -223,12 +225,12 @@ public class ReservationService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "404", "NOT_FOUND", "존재하지 않는 예약 ID입니다."));
 
         // 예약 상태가 성공이었는지 확인하기
-        if(!reservation.getReservationStatus().equals(ReservationStatus.PURCHASE_CONFIRMED)){
+        if (!reservation.getReservationStatus().equals(ReservationStatus.PURCHASE_CONFIRMED)) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "400", "BAD_REQUEST", "성공한 예약이 아님으로 취소할 수 없습니다.");
         }
 
         // 예약 비밀번호 검증하기
-        if(!req.getTeamPassword().equals(reservation.getTempPassword())){
+        if (!req.getTeamPassword().equals(reservation.getTempPassword())) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "400", "BAD_REQUEST", "예약 시 사용했던 비밀번호가 틀렸습니다..");
         }
 
@@ -239,6 +241,77 @@ public class ReservationService {
         kafkaTemplateV2.send(REQUEST_TOPIC, kafkaEventReservationRequest);
 
         // 예매할 떄는 바로 재고 차감 했지만 혹시모르니 재고 증가는 가장 마지막에 처리하기로!
+
+    }
+
+    // 기존 예매 조회에서 제품명도 함께 담아주기
+    public List<ReservationResponse> getAllReservationsV2(GetReservationRequest req) {
+
+        // 어차피 제품 ID 를 통해 패치조인을 하려고헀지만, 연관 관계 매핑이 애매해짐
+        // 기존 이미 제품 ID 만 담아주는 설계로 해버려서 연관관계 설정이 안 되어있다라는 엄청 큰 문제 발생
+        // 따라서 제품에 대한 정보는 별도로 Select 를 해서 자마 코드로 매핑해서 쓰는 방법으로 해야겠음
+
+        // 1. 예매 정보 가져와서 검증하기
+        log.info("비회원 예약 구매조회 이름 : = {}", req.getBuyerName());
+
+        // 조회해서 반환
+        List<Reservation> allReservation = reservationRepository.getAllReservation(req.getBuyerName(), req.getBirthDate(), req.getTeamPassword());
+
+        if (allReservation.isEmpty()) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "404", "NOT_FOUND", "회원정보와 일치하는 예약 내역이 없습니다.");
+        }
+
+        // 제품에 대한 정보는 어디서 꺼낼까
+        // 1. Redis 에서 꺼내오기
+        // 2. MySQL 에서 꺼내오기
+        // 결국 상품에 대한 정보는 Redis 에 전부 담겨있음으로 Redis 를 활용하는 방법으로 하자
+        // multiGet 으로 한번에 가져오기가 가능하다.
+
+        // 예약 내역에서 키만 다 뽑아서 리스트로 만들기
+        List<String> keys = allReservation.stream()
+                .map(a -> PRODUCT_PREFIX + a.getProductId())
+                .toList();
+
+        // 키들을 통해 모두 조회
+        List<@Nullable Object> products = redisTemplate.opsForValue().multiGet(keys);
+
+        if (products.get(0) == null) {
+            List<Product> all = productRepository.findAll();
+            all.forEach(p -> {
+                log.info(all.toString());
+                HashMap<String, String> redisValue = new HashMap<>();
+                redisValue.put("productId", p.getId().toString()); // 콘서트 ID
+                redisValue.put("productName", p.getName());        // 콘서트 이름
+                redisValue.put("concertDateTime", p.getConcertDateTime().toString()); // 콘서트 시간
+                redisValue.put("price", p.getPrice().toString());  // 콘서트 가격
+                redisValue.put("status", p.getStatus().toString());// 콘서트 판매 상태
+                redisTemplate.opsForValue().set(PRODUCT_PREFIX + p.getId(), redisValue);
+            });
+
+            // 다시 조회
+            products = redisTemplate.opsForValue().multiGet(keys);
+        }
+
+        // 그래도 안 제품이 안올라가있다면 예외처리
+        if(products.isEmpty()) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "404", "NOT_FOUND", "상품을 찾을 수 없습니다.");
+        }
+
+        // 매핑해서 반환하기
+        return allReservation.stream()
+                .map(r -> {
+                    // 레디스에서 해당 제품 키로 조회
+                    Object product = redisTemplate.opsForValue().get(PRODUCT_PREFIX + r.getProductId());
+
+                    // 제품 꺼내기
+                    Map<String, String> productInfo = (Map<String, String>) product;
+
+                    // ResponseDTO 로 변환
+                    return new ReservationResponse(
+                            r.getId(), r.getOrderId(), r.getQuantity(), r.getTotalPrice(), r.getBuyerName(), r.getBirthDate(),
+                            r.getReservationStatus(), r.getTimestamp(), productInfo.get("productName"), LocalDateTime.parse(productInfo.get("concertDateTime")), r.getCreatedAt());
+                })
+                .toList();
 
     }
 
