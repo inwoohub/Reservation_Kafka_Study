@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.stockconsumer.StockConsumerApplicationTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-05-14T05:35:25.856Z" hostname="inwooui-MacBookPro.local" time="0.005">
+  <properties/>
+  <testcase name="contextLoads()" classname="com.example.stockconsumer.StockConsumerApplicationTests" time="0.001"/>
+  <system-out><![CDATA[2026-05-14T14:35:25.857+09:00  INFO 26537 --- [stock-consumer] [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.example.stockconsumer.StockConsumerApplicationTests]: StockConsumerApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-05-14T14:35:25.858+09:00  INFO 26537 --- [stock-consumer] [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.example.stockconsumer.StockConsumerApplication for test class com.example.stockconsumer.StockConsumerApplicationTests
+2026-05-14T14:35:25.858+09:00  INFO 26537 --- [stock-consumer] [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.example.stockconsumer.StockConsumerApplicationTests]: StockConsumerApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-05-14T14:35:25.859+09:00  INFO 26537 --- [stock-consumer] [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.example.stockconsumer.StockConsumerApplication for test class com.example.stockconsumer.StockConsumerApplicationTests
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
